@@ -1,0 +1,8 @@
+form {font: small sans-serif; text-align: center;}
+form .text {border: 1px solid #ddf; width: 375px;}
+form .area {width: 350px; height: 200px; padding: 3px;}
+form .area_wide {width: 450px; height: 240px; padding: 3px;}
+legend {display: none}
+fieldset {margin: 2em auto; border: none;}
+#broadcast {color: red;}
+.failed {background: #f99;}

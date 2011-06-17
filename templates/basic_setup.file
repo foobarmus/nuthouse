@@ -1,0 +1,54 @@
+$def with (f)
+
+# this stuff is configurable
+
+site = {
+    'name':'$f.site',
+    'cx':'$f.cx'
+}
+
+db_info = {
+    'dbn':'$f.dbn',
+    'db':'$f.db',
+    'user':'$f.user',
+    'pw':'$f.pw'
+}
+
+mail = {
+    'server':'smtp.gmail.com',
+    'port':587,
+    'username':'$f.gmail_username@gmail.com',
+    'password':'$f.gmail_password',
+    'starttls':True
+}
+
+# this stuff is only used for initial setup
+
+consul = {
+    'name':'$f.consul',
+    'password':'$f.consul_pw',
+    'email':'$f.email',
+    'level':7,
+    'terms_accepted':True
+}
+
+board = {
+    'short_name':'main',
+    'name':'Main forum',
+    'new_topic_post':0
+}
+
+ntp = {
+    'id':0,
+    'board':1,
+    'parent':0,
+    'subject':'New topic',
+    'member':'$f.consul'
+}
+
+welcome = {
+    'board':1,
+    'subject':'Welcome',
+    'content':~$f.post~,
+    'member':'$f.consul'
+}

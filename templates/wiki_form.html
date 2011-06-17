@@ -1,0 +1,33 @@
+$def with (name, path, crumbs, action, content, can_take)
+
+<form name="wiki_page" action="$action" method="post">
+<fieldset>
+<legend>Page details</legend>
+<label for="name">Page title</label>
+<input name="name" id="name" class="text"
+
+$if name:
+    value="$name"
+
+/><br /><br />
+<label for="crumbs">Breadcrumbs</label>
+<input name="crumbs" id="crumbs" value="$crumbs" class="text" /><br /><br />
+<label for="content_field">
+    Content (you can use <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>)
+</label><br />
+<textarea name="content_field" id="content_field" class="text area_wide">$:content</textarea>
+
+$if can_take:
+    <br /><br /><label for="own"><input type="checkbox" name="own" id="own" value="t" /> take ownership of page<label>
+
+<input name="path" type="hidden" value="$path" />
+</fieldset>
+<input type="submit"
+
+$if action == 'edit':
+    value="update page"
+$else:
+    value="create page"
+
+/>
+</form>

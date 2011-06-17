@@ -1,0 +1,91 @@
+$def with (user, joined, level, blog, expand_blog, recent_posts, pages, show, pic)
+
+<table id="profile">
+<tr>
+<th>
+<div id="pic"
+
+$if pic:
+    style="background: url(/static/upload/$pic) center center no-repeat"
+
+>
+
+$if show.blog_link:
+    <a href="upload_profile_pic">&nbsp;</a>
+$else:
+    &nbsp;
+
+</div>
+</th>
+<td>
+<div>
+<strong>$level.capitalize()</strong>
+
+$if show.consular_controls or show.patrician_controls:
+    (
+    $if show.consular_controls:
+        <a title="level up" href="/level_up?user=$user">++</a>&ensp;
+    $if show.patrician_controls:
+        <a title="punish" href="/troglify?user=$user">&minus;&minus;</a>&ensp;
+        <a title="lock account" href="/lock?user=$user">X</a>
+    )
+
+</div>
+<p>Member since: $joined</p>
+
+$if show.blog_link:
+    <p><a href="/blog_create">new blog post</a></p>
+
+</td>
+</tr>
+
+$if blog:
+    <tr>
+    <th>$blog.posted</th>
+    <td>
+    <div><strong>$blog.title</strong>
+    $if show.blog_link:
+        (<a href="blog_edit?bid=$blog.id">edit</a>)
+    </div>
+    $:blog.content
+    $if expand_blog == False:
+        <p><a href="/profile?user=$user&expand_blog=t">show prior entries</a></p>
+    </td>
+    </tr>
+
+$if expand_blog:
+    $for b in expand_blog:
+        <tr>
+        <th>$b.posted</th>
+        <td>
+        <div><strong>$b.title</strong>
+        $if show.blog_link:
+            (<a href="blog?bid=$b.id&edit=t">edit</a>)
+        </div>
+        $:b.content
+        </td>
+        </tr>
+
+$if recent_posts:
+    <tr>
+    <th><div>Recent forum activity</div></th>
+    <td>
+    <table>
+    $for post in recent_posts:
+        <tr><td><strong><a href="/post?pid=$post.id">$post.subject</a></strong></td></tr>
+    </table>
+    </td>
+    </tr>
+
+$if pages:
+    <tr>
+    <th>Maintainer of</th>
+    <td>
+    <table> 
+    $for page in pages:
+        <tr><td>/$page.path</td><td><a href="/$page.path">$page.name</a></td></tr>
+    </table>
+    </td>
+    </tr>
+
+</table>

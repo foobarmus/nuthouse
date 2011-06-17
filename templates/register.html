@@ -1,0 +1,52 @@
+$def with (broadcast, user, email)
+
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/form.css" />
+    <link rel="stylesheet" type="text/css" href="/static/reg.css" />
+    <script type\"text/javascript" src="/static/val.js"></script>
+</head>
+<body>
+<form name="login" action="/register" method="post" onsubmit="return validate(this)">
+<h3>New user registration</h3>
+
+$if broadcast:
+    <div id="broadcast">$:broadcast</div>
+
+<fieldset>
+<legend>Member details</legend>
+<label for="user" id="user-label">User</label>
+<input name="user" id="user" size="11" class="text required"
+
+$if user:
+    value="$user"
+
+/><br /><br />
+<label for="password" id="password-label">Pwd</label>
+<input name="password" id="password" type="password" size="12" class="text required" /><br /><br />
+<label for="confirm" id="confirm-label">Pwd</label>
+<input name="confirm" id="confirm" type="password" size="12" class="text required" /><br /><br />
+<label for="email" id="email-label">Email</label>
+<input name="email" id="email" size="14" class="text required"
+
+$if email:
+    value="$email"
+
+/><br />
+<div>
+<input class="submit" type="image" src="/static/reg.jpg" value="" />
+</div>
+</fieldset>
+<div id="iframes">
+<iframe src="/static/privacy_policy.txt"></iframe>&emsp;
+<iframe src="/static/terms_of_use.txt"></iframe>
+</div>
+<label for="terms" id="terms-label"><input name="terms" id="terms" type="checkbox" value="t" class="required"
+
+$if broadcast:
+    checked="checked"
+
+/> I have read the privacy policy and terms of use, and accept them both.</label><br /><br />
+</form>
+</body>
+</html>

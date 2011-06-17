@@ -1,0 +1,4 @@
+$def with (server, user, code)
+
+To complete registration, please follow this link:
+http://$server/confirm_email?user=$user&code=$code

@@ -1,0 +1,35 @@
+$def with (site, redirect_to, broadcast)
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>$site</title>
+    <link rel="stylesheet" type="text/css" href="/static/form.css" />
+    <link rel="stylesheet" type="text/css" href="/static/auth.css" />
+    <script type="text/javascript" src="/static/val.js"></script>
+</head>
+<body>
+
+$if broadcast:
+    <div id="broadcast">$broadcast</div>
+
+<form name="login" action="/login" method="post" onsubmit="return validate(this)">
+    <fieldset>
+        <legend>Login details</legend>
+        <label for="user" id="user-label">User</label>
+        <input name="user" id="user" size="11" class="text required" /><br /><br />
+        <label for="password" id="password-label">Pwd</label>
+        <input name="password" id="password" type="password" size="12" class="text required" /><br />
+        <div>
+            <input class="submit" type="image" src="/static/login.jpg" value="" />&emsp;
+            <a href="/register">register</a> |
+            <a href="/forgot">forgot</a>
+        </div>
+    </fieldset>
+
+$if redirect_to:
+    <input type="hidden" name="redirect_to" value="$redirect_to" />
+
+    </form>
+</body>
+</html>

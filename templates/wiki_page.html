@@ -1,0 +1,10 @@
+$def with (content, owner, path, editable, modified)
+
+            $:content
+            <div id="dateline">
+                Maintained by <a href="/profile?user=$owner">$owner</a>. Last modified $modified
+
+$if editable:
+    ... <a href="/edit?path=$path">edit</a>
+
+</div>

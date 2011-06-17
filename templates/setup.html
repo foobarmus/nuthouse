@@ -1,0 +1,61 @@
+$def with ()
+
+<html>
+<head>
+    <title>Configure your Nuthouse site</title>
+    <link rel="stylesheet" type="text/css" href="/static/form.css" />
+    <link rel="stylesheet" type="text/css" href="/static/setup.css" />
+    <script type="text/javascript" src="/static/val.js"></script>
+</head>
+<body>
+    <form name="setup" action="/setup" method="post" onsubmit="return validate(this)">
+        <fieldset class="top">
+            <legend>Site info</legend>
+            <label for="site" id="site-label">Site name</label>
+            <input name="site" id="site" class="text required" /><br /><br />
+            <label for="cx" id="cx-label">Google CSE cx</label>
+            <input name="cx" id="cx" class="text required" />&emsp;<span class="grey">eg. 0123456789:abcdefgh</span>
+        </fieldset>
+        <fieldset>
+            <legend>Database setup</legend>
+            <label for="dbn" id="dbn-label">RDBMS</label>
+            <select name="dbn" id="dbn" class="text required" />
+                <option value="postgres" selected />Postgres
+            </select><br /><br />
+            <label for="db" id="db-label">Database name</label>
+            <input name="db" id="db" class="text required" /><br /><br />
+            <label for="user" id="user-label">User</label>
+            <input name="user" id="user" class="text required" /><br /><br />
+            <label for="pw" id="pw-label">Password</label>
+            <input name="pw" id="pw" type="password" class="text required" />
+        </fieldset>
+        <fieldset>
+            <legend>Gmail setup</legend>
+            <label for="gmail_username" id="gmail_username-label">Gmail user</label>
+            <input name="gmail_username" id="gmail_username" class="text required" />&emsp;<span class="grey">for system emails</span><br /><br />
+            <label for="gmail_password" id="gmail_password-label">Password</label>
+            <input name="gmail_password" id="gmail_password" type="password" class="text required" />
+        </fieldset>
+        <fieldset>
+            <legend>Admin user</legend>
+            <label for="consul" id="consul-label">Admin user</label>
+            <input name="consul" id="consul" class="text required" />&emsp;<span class="grey">no spaces or weird shit</span><br /><br />
+            <label for="consul_pw" id="consul_pw-label">Password</label>
+            <input name="consul_pw" id="consul_pw" type="password" class="text required" /><br /><br />
+            <label for="confirm_pw" id="confirm_pw-label">Confirm password</label>
+            <input name="confirm_pw" id="confirm_pw" type="password" class="text required" /><br /><br />
+            <label for="email" id="email-label">Email</label>
+            <input name="email" id="email" size="14" class="text required" />
+        </fieldset>
+        <fieldset>
+            <legend>Main forum</legend>
+            <label for="post" id="post-label">Forum welcome:</label><br /><br />
+            <textarea name="post" id="post" class="text area">Welcome to the my_proj forum.</textarea><br />
+            &emsp; <span class="grey">* you can use <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a></span>
+            <div>
+                <input type="submit" value="save setup" />&emsp;
+            </div>
+        </fieldset>
+    </form>
+</body>
+</html>

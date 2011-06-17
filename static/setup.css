@@ -1,0 +1,28 @@
+form {
+    position: static;
+    height: auto;
+    margin: 50px auto;
+}
+
+label {
+    width: 120px;
+}
+
+fieldset {
+    width: 460px;
+    margin-top: 0;
+}
+
+fieldset.top {
+    margin-top: 135px;
+}
+
+.grey {
+    color: #a5acb2;
+}
+
+form .area {
+    width: 272px;
+    height: 140px;
+    padding: 3px;
+}

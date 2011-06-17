@@ -1,0 +1,26 @@
+$def with (action, id, title, content)
+
+<form name="blog_$action" action="blog_$action" method="post">
+<fieldset>
+    <legend>New blog post</legend>
+    <label for="title">Blog title</label>
+    <input name="title" id="title" class="text" value="$title" /><br /><br />
+    <label for="content_field">
+        Content (you can use
+        <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>)
+    </label><br />
+    <textarea name="content_field" id="content_field" class="text area_wide">$:content</textarea>
+</fieldset>
+
+$if action == 'edit':
+    <input type="hidden" name="bid" value="$id" />
+
+<input type="submit"
+
+$if action == 'create':
+    value="post"
+$else:
+    value="update"
+
+/>
+</form>

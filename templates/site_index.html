@@ -1,0 +1,9 @@
+$def with (pages)
+
+<table>
+<tr><th></th><th>Page title</th><th>Modified</th></tr>
+
+$for page in pages:
+    <tr><td>/$page.path</td><td><a href="/$page.path">$page.name</a></td><td>$page.modified</td></tr>
+
+</table>

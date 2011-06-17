@@ -1,0 +1,28 @@
+$def with (board, posts, member, other_boards)
+
+<table id="bbs">
+
+$for post in posts:
+    <tr>
+    <td><strong><a href="/post?pid=$post.id">$post.subject</a></strong>
+    $if post.comments > 0:
+        ($post.comments)
+    </td>
+    <td>$post.member</td>
+    <td>$post.posted</td>
+    </tr>
+
+</table>
+
+$if member:
+    <p><a href="/post?pid=$board.new_topic_post">new topic</a></p>
+$else:
+    <p>log in to post</p>
+
+<h4>Other forums</h4>
+<p>
+
+$for board in other_boards:
+    <a href="/forum?board=$board.short_name">$board.name</a><br />
+
+</p>

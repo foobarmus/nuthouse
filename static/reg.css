@@ -1,0 +1,38 @@
+form {
+    position: static;
+    width: 990px;
+    height: auto;
+    margin: 50px auto;
+}
+
+h3 {
+    position: absolute;
+    top: 70px; right: 0; left: 0;
+    margin: 0 auto;
+    padding: 2em 340px;
+}
+
+fieldset {
+    width: 545;
+    padding-left: 355;
+}
+
+fieldset div {
+    margin-left: 65px;
+}
+
+iframe {
+    width: 465px;
+    height: 350px;
+    background: white;
+    border: 1px solid #a5acb2;
+}
+
+#iframes {
+    margin: 2em 0 1em 0;
+}
+
+label#terms-label {
+    float: none;
+    width: auto;
+}
