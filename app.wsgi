@@ -57,7 +57,7 @@ else:
             '/confirm_email', 'confirm_email',
             '/forgot', 'forgot',
             '/profile', 'profile',
-            '/forum', 'bbs',
+            '/forum.*', 'bbs',
             '/post', 'post',
             '/site index', 'site_index',
             '/error', 'error',
@@ -327,31 +327,48 @@ class post:
 class wiki:
     def GET(self, uri):
         f = web.input()
-        referer = urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]
-        referer = referer.strip('/')
-        path = web.ctx.path.split('/')[1]
-        path = path and path or 'index'
+        path = web.ctx.path.split('/')
+        crumbs = path[1:-1]
+        path = path and path[-1] or 'index'
         find_page = db.select('page',
                               {'p':path},
                               where='path = $p')
         page = find_page and find_page[0] or None
-        if page:
-            user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
-            editable = user and (user[0].level > 4 or s.user == page.owner)
-            content = render.wiki_page(markdown.markdown(page.content.encode('ascii', 'replace')),
-                                       page and page.owner or None,
-                                       path,
-                                       editable,
-                                       page and str(page.modified).split()[0] or None)
+        try:
+            try:
+                if crumbs:
+                    assert page.breadcrumbs == crumbs
+                    raise CanonicalUrl
+                else:
+                    # still need to generate an attribute error if there is no page, so...
+                    crumbs = page.breadcrumbs
+            except AssertionError:
+                raise PathMismatch('/'.join(crumbs), path)
+            except AttributeError:
+                if not crumbs:
+                    referer = urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]
+                    parent_page = (referer and referer != 'auth') and db.select('page', {'r':referer}, where='path = $r')[0] or None
+                    crumbs = parent_page and parent_page.breadcrumbs or []
+                    crumbs.append(referer.strip('/'))
+                content = render.big_fat_404(path, '/'.join(crumbs))
+            else:
+                user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
+                editable = user and (user[0].level > 4 or s.user == page.owner)
+                content = render.wiki_page(markdown.markdown(page.content.encode('ascii', 'replace')),
+                                           page and page.owner or None,
+                                           path,
+                                           editable,
+                                           page and str(page.modified).split()[0] or None)
+        except (PathMismatch, CanonicalUrl), e:
+            web.seeother('/%s%s' % (path, e.value and '?broadcast=%s' % urllib.quote(e.value) or ''))
         else:
-            content = render.big_fat_404(path, referer)
-        return render.site(site,
-                           s.user,
-                           web.ctx.fullpath.strip('/'),
-                           logo,
-                           db.select('dual', {'p':path}, what='crumb($p)')[0].crumb,
-                           menu,
-                           f.has_key('broadcast') and f.broadcast or None,
+            return render.site(site,
+                               s.user,
+                               web.ctx.fullpath.strip('/'),
+                               logo,
+                               db.select('dual', {'p':path}, what='crumb($p)')[0].crumb,
+                               menu,
+                               f.has_key('broadcast') and f.broadcast or None,
                            content)
 
 
@@ -365,16 +382,15 @@ class create:
             create_access = user[0].level > 2
             if not create_access:
                 raise Access('Creating pages', 'plebeians and above')
-            parent_page = (f.referer and f.referer != 'auth') and db.select('page', {'r':f.referer}, where='path = $r')[0] or None
-            breadcrumbs = parent_page and parent_page.breadcrumbs or []
-            breadcrumbs.append(f.referer)
-            crumbstring = parent_page and ' > '.join(breadcrumbs) or ''
+            crumbs = f.crumbs and f.crumbs.split('/') or []
+            crumbs.append('Create page /%s' % f.path)
+            crumbstring = f.crumbs and f.crumbs.replace('/', ' > ') or ''
             content = render.wiki_form(None, f.path, crumbstring, 'create', '', False)
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
                                logo,
-                               str(render.breadcrumb('Create page /%s' % f.path)),
+                               str(render.breadcrumb(crumbs)),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
                                content)
@@ -426,16 +442,15 @@ class edit:
 
     def POST(self):
         f = web.input()
-        crumbs = [b.strip() for b in f.crumbs.split('>') if b != '']
-        bread = crumbs and 'breadcrumbs=crumbs,' or ''
+        crumbs = f.crumbs and [b.strip() for b in f.crumbs.split('>') if b != ''] or None
         own = (f.has_key('own') and f.own == 't') and 'owner=s.user,' or ''
         update_str = '''db.update('page',
                                   where="path = '%s'",
                                   name=f.name,
-                                  %s
+                                  breadcrumbs=crumbs,
                                   content=f.content_field,
                                   %s
-                                  modified='NOW')''' % (f.path, bread, own)
+                                  modified='NOW')''' % (f.path, own)
         eval(update_str)
         return web.seeother('/%s' % f.path)
 

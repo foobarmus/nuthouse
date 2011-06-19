@@ -1,2 +1,9 @@
-$def with (crumb)
-<a href="/">Home</a> <span class="caret">&gt;</span> $crumb
+$def with (crumbs)
+<a href="/">Home</a>
+
+$for crumb in crumbs:
+    <span class="caret">&gt;</span>
+    $if crumb is crumbs[-1]:
+        $crumb
+    $else:
+        <a href="/$crumb">$crumb</a>
