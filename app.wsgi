@@ -250,7 +250,7 @@ class profile:
                            s.user,
                            web.ctx.fullpath.strip('/'),
                            logo,
-                           str(render.breadcrumb('Member profile: %s' % (f.user))),
+                           str(render.breadcrumb(['Member profile: %s' % (f.user)])),
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
@@ -272,7 +272,7 @@ class bbs:
                            s.user,
                            web.ctx.fullpath.strip('/'),
                            logo,
-                           str(render.breadcrumb(vars['board'].name)),
+                           str(render.breadcrumb([vars['board'].name])),
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
@@ -346,10 +346,13 @@ class wiki:
                 raise PathMismatch('/'.join(crumbs), path)
             except AttributeError:
                 if not crumbs:
-                    referer = urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]
-                    parent_page = (referer and referer != 'auth') and db.select('page', {'r':referer}, where='path = $r')[0] or None
-                    crumbs = parent_page and parent_page.breadcrumbs or []
-                    crumbs.append(referer.strip('/'))
+                    referer = urllib.unquote_plus(urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]).strip('/')
+                    if referer:
+                        parent_page = referer != 'auth' and db.select('page', {'r':referer}, where='path = $r')[0] or None
+                        crumbs = parent_page and parent_page.breadcrumbs or []
+                        crumbs.append(referer.strip('/'))
+                    else:
+                        crumbs = []
                 content = render.big_fat_404(path, '/'.join(crumbs))
             else:
                 user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
@@ -362,14 +365,16 @@ class wiki:
         except (PathMismatch, CanonicalUrl), e:
             web.seeother('/%s%s' % (path, e.value and '?broadcast=%s' % urllib.quote(e.value) or ''))
         else:
+            breadcrumbs = page and (crumbs and crumbs + [page.name] or [page.name]) or (crumbs and crumbs + [path] or [path])
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
                                logo,
-                               db.select('dual', {'p':path}, what='crumb($p)')[0].crumb,
+                               path == 'index' and page.name or str(render.breadcrumb(breadcrumbs)),
+                               #db.select('dual', {'p':path}, what='crumb($p)')[0].crumb,
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
-                           content)
+                               content)
 
 
 class create:
@@ -431,7 +436,7 @@ class edit:
                                s.user,
                                web.ctx.fullpath.strip('/'),
                                logo,
-                               str(render.breadcrumb('Edit page /%s' % f.path)),
+                               str(render.breadcrumb(['Edit page /%s' % f.path])),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
                                content)
@@ -470,7 +475,7 @@ class blog_create:
                                s.user,
                                web.ctx.fullpath.strip('/'),
                                logo,
-                               str(render.breadcrumb('New blog post')),
+                               str(render.breadcrumb(['New blog post'])),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
                                content)
@@ -507,7 +512,7 @@ class blog_edit:
                                s.user,
                                web.ctx.fullpath.strip('/'),
                                logo,
-                               str(render.breadcrumb('Edit blog: %s' % blog.title)),
+                               str(render.breadcrumb(['Edit blog: %s' % blog.title])),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
                                content)
@@ -539,7 +544,7 @@ class upload_profile_pic:
                                s.user,
                                web.ctx.fullpath.strip('/'),
                                logo,
-                               str(render.breadcrumb('Upload profile pic')),
+                               str(render.breadcrumb(['Upload profile pic'])),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
                                content)
@@ -615,7 +620,7 @@ class site_index:
                            s.user,
                            web.ctx.fullpath.strip('/'),
                            logo,
-                           str(render.breadcrumb('Site index')),
+                           str(render.breadcrumb(['Site index'])),
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
