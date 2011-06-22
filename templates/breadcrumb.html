@@ -6,4 +6,7 @@ $for crumb in crumbs:
     $if crumb is crumbs[-1]:
         $crumb
     $else:
-        <a href="/$crumb">$crumb</a>
+        $if isinstance(crumb, tuple):
+            <a href="/$crumb[0]?crumbs=$crumb[1]">$crumb[0]</a>
+        $else:
+            <a href="/$crumb">$crumb</a>

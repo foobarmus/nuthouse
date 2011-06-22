@@ -80,6 +80,16 @@ else:
     strender = StringRender(base_path + 'templates/')
     menu = [code.val for code in db.select('code', {'n':'menu_item'}, where='name = $n', order='id')]
 
+def fix_broken(crumbs):
+    try:
+        crumbs.remove('ignore_referer')
+    except ValueError:
+        pass
+    for i in range(len(crumbs)):
+        # add explicit crumbs payload for non-existant pages in breadcrumb list
+        if not db.select('page', {'c':crumbs[i]}, where='path = $c'):
+            crumbs[i] = (crumbs[i], crumbs[:i] and '/'.join(isinstance(c, tuple) and c[0] or c for c in crumbs[:i]) or 'ignore_referer')
+    return crumbs
 
 # main app code
 
@@ -332,21 +342,25 @@ class wiki:
                     assert page.breadcrumbs == crumbs
                     raise CanonicalUrl
                 else:
-                    # still need to trigger an attribute error if there is no page, so...
-                    crumbs = page.breadcrumbs
+                    crumbs = (f.has_key('crumbs') and f.crumbs) and [f.crumbs] or page.breadcrumbs
+                    if not page:
+                        raise AttributeError
             except AssertionError:
                 raise PathMismatch('/'.join(crumbs), path)
             except AttributeError:
                 if not crumbs:
                     referer = urllib.unquote_plus(urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]).strip('/')
-                    if referer:
-                        parent_page = referer != 'auth' and db.select('page', {'r':referer}, where='path = $r')[0] or None
+                    actual = db.select('page', {'r':referer}, where='path = $r')
+                    if referer and actual:
+                        parent_page = referer != 'auth' and actual[0] or None
                         crumbs = parent_page and parent_page.breadcrumbs or []
                         crumbs.append(referer.strip('/'))
                     else:
                         crumbs = []
-                content = render.big_fat_404(path, '/'.join(crumbs))
+                crumbs = fix_broken(crumbs)
+                content = render.big_fat_404(path, '/'.join(isinstance(c, tuple) and c[0] or c for c in crumbs))
             else:
+                crumbs = fix_broken(crumbs)
                 user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
                 editable = user and (user[0].level > 4 or s.user == page.owner)
                 content = render.wiki_page(page.name,
