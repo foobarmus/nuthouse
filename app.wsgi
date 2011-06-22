@@ -85,6 +85,8 @@ def fix_broken(crumbs):
         crumbs.remove('ignore_referer')
     except ValueError:
         pass
+    except:
+        crumbs = []
     for i in range(len(crumbs)):
         # add explicit crumbs payload for non-existant pages in breadcrumb list
         if not db.select('page', {'c':crumbs[i]}, where='path = $c'):
