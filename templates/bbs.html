@@ -1,5 +1,7 @@
 $def with (board, posts, member, other_boards)
 
+<h2>$board.name</h2>
+<p>
 <table id="bbs">
 
 $for post in posts:
@@ -13,16 +15,16 @@ $for post in posts:
     </tr>
 
 </table>
+</p>
 
 $if member:
     <p><a href="/post?pid=$board.new_topic_post">new topic</a></p>
 $else:
     <p>log in to post</p>
 
-<h4>Other forums</h4>
-<p>
-
-$for board in other_boards:
-    <a href="/forum?board=$board.short_name">$board.name</a><br />
-
-</p>
+$if other_boards:
+    <h4>Other forums</h4>
+    <p>
+    $for board in other_boards:
+        <a href="/forum?board=$board.short_name">$board.name</a><br />
+    </p>

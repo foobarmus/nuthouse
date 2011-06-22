@@ -1,4 +1,4 @@
-$def with (site, member, path, logo, breadcrumbs, menu, broadcast, page_content)
+$def with (site, member, path, breadcrumbs, menu, broadcast, page_content)
 
 <!DOCTYPE html>
 <html  xmlns="http://www.w3.org/1999/xhtml">  
@@ -20,26 +20,19 @@ $if path.split('?')[0] == 'search':
 $if member:
     Welcome, <a href="/profile?user=$member">$member</a>
 $else:
-    <a href="/auth?page=$path">Log in</a>
+    <a href="/auth?page=$path"><img src="/static/memberlogin.jpg" alt="Log in" /></a>
 
 </div>
+<div id="menu">
 <form action="/search" id="cse-search-box">
   <div id="search">
     <input type="hidden" name="cx" value="$site['cx']" />
     <input type="hidden" name="cof" value="FORID:9" />
     <input type="hidden" name="ie" value="UTF-8" />
-    <input id="q" type="text" name="q" size="31" onfocus="goo_focus(this)" onblur="goo_blur(this)" />
-    <input class="submit" type="submit" name="sa" value="" />
+    <input id="q" type="text" name="q" size="31" onfocus="goo_focus(this)" onblur="goo_blur(this)"
+        /><input class="submit" type="submit" name="sa" value="Search" />
   </div>
 </form>
-<div id="logo">
-  <a href="/"><img src="/static/upload/$logo" alt="$site['name']" /></a>
-</div>
-</div>
-<div id="breadcrumbs">
-  <div>$:breadcrumbs</div>
-</div>
-<div id="menu">
 <ul>
 
 $for item in menu:
@@ -48,9 +41,13 @@ $for item in menu:
         class="active"
     $elif breadcrumbs.lower().find(item) > -1:
         class="active"
-    >$item.capitalize().replace('_', ' ')</a></li>
+    >($item.upper().replace('_', ' '))</a></li>
 
 </ul>
+</div>
+</div>
+<div id="breadcrumbs">
+  <div><span>You are here:</span>&ensp;$:breadcrumbs</div>
 </div>
 <div id="content">
 

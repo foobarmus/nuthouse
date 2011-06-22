@@ -8,7 +8,7 @@ form {
     width: 680px;
     height: 345px;
     margin: auto;
-    background: #f9f8f4 url("/static/big-logo.gif") no-repeat 40px 35px;
+    background: #f9f8f4 /*url("/static/big-logo.gif") no-repeat 40px 35px*/;
     border: 4px solid #dfab79;
     font: 14px arial,sans-serif;
     text-align: center;

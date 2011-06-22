@@ -1,3 +1,7 @@
+body {
+    background: black;
+}
+
 #broadcast {
     margin: 3em;
     font: small arial,sans-serif;

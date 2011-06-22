@@ -1,9 +1,12 @@
 $def with (member, post, ancestors, descendants, board)
 
 $if post:
-    $:ancestors
+    <h2>$post.subject</h2>
+    <p>$:ancestors</p>
     <div id="post">$:post.content<p>&minus; <a class="black" href="profile?user=$post.member">$post.member</a></p></div>
     $:descendants
+$else:
+    <h2>New topic</h2>
 
 $if member:
     <form name="post" action="post" method="post">

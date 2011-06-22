@@ -1,8 +1,10 @@
 @import url("/static/content_form.css");
 
 body {
-    margin: 0;
+    text-align: center;
     font: small arial,sans-serif;
+    background: black;
+    color: white;
 }
 
 img {
@@ -38,84 +40,26 @@ code {
     font: 12px monospace;
 }
 
-#header {
-    position: absolute;
-    z-index: 2;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 72px;
-    background: white;
+#wrapper {
+    width: 960px;
+    margin: 0 auto;
+    text-align: left;
+    background: url("/static/logo.jpg") no-repeat;
 }
 
 #user {
-    position: absolute;
-    top: 6px;
-    right: 20px;
-    font: 14px verdana,sans-serif;
+    float: right;
+    margin: 20px 50px;
+    color: #a00;
 }
 
 #user a {
     text-decoration: none;
-    color: black;
-}
-
-#search {
-    position: absolute;
-    right: 20px;
-    bottom: 14px;
-}
-
-#search input#q {
-    width: 200px;
-    height: 15px;
-    border: 1px solid #a5acb2;
-    font-size: 12px;
-    background: url("/static/google_custom_search_watermark.gif") left no-repeat;
-}
-
-#search input.submit {
-    width: 61px;
-    height: 20px;
-    background: url("/static/search.jpg") no-repeat bottom right;
-    border: none;
-}
-
-#logo img {
-    margin: 14px 0 0 20px;
-}
-
-#breadcrumbs {
-    position: absolute;
-    z-index: 3;
-    top: 72px;
-    left: 0;
-    width: 100%;
-    height: 40px;
-    border-top: 6px solid #d5dddf;
-    background: #404040;
-    font-size: large;
-    line-height: 40px;
-    color: #d5ddff;
-}
-
-#breadcrumbs div {
-    padding-left: 20px;
-}
-
-#breadcrumbs .caret {
-    color: #899b9d;
-}
-
-#breadcrumbs a {
-    color: white;
+    color: #a00;
 }
 
 #menu {
-    position: absolute;
-    top: 134px;
-    left: 5px;
-    width: 175px;
+    padding: 136px 0 0 65px;
 }
 
 #menu ul {
@@ -125,33 +69,54 @@ code {
 }
 
 #menu ul li {
-    margin: 0;
+    display: inline-block;
+    margin: 0 1em 0 0;
     padding: 0;
 }
 
 #menu ul li a {
-    display: block;
-    padding: 6px 0 6px 12px;
-    border-left: 4px solid white;
-    font-size: medium;
     font-weight: bold;
     text-decoration: none;
-    color: black;
+    color: #a00;
 }
 
 #menu ul li a:hover, #menu ul li a.active {
-    background: #dfab79;
-    border-left: 4px solid #a7621f;
-    color: white;
+    color: #399;
+}
+
+#search {
+    float: right;
+    margin-top: -4px;
+}
+
+#search input#q {
+    width: 197px;
+    padding-left: 3px;
+    border: 2px solid #a98;
+    -moz-border-radius:3px;
+    border-radius:3px;
+    background: white url("/static/google_custom_search_watermark.gif") left no-repeat;
+}
+
+#breadcrumbs {
+    clear: both;
+    padding: 1px 65px 2px;
+    border-top: 1px solid #a00;
+    border-bottom: 1px solid #a00;
+    color: #79c;
+}
+
+#breadcrumbs div {
+    color: #ffd;
+}
+
+#breadcrumbs a {
+    color: #a98;/*fe9,79c*/
 }
 
 #content {
-    z-index: 1;
-    min-height: 200px;
-    margin: 0 0 0 180px;
-    padding: 143px 37px 25px;
-    background: #f9f8f4;
-    border-left: 3px solid #dfab79;
+    min-height: 400px;
+    padding: 0 30px 0 65px;
 }
 
 #content table#bbs {
@@ -166,6 +131,7 @@ code {
     padding: 10px;
     background: white;
     border: 1px solid #999;
+    color: black;
 }
 
 #content ul.thread {
@@ -189,6 +155,7 @@ code {
 
 #content ul.thread li a.black {
     font-weight: normal;
+    color: white;
 }
 
 #content table#profile th, #content table#profile td {
@@ -238,7 +205,7 @@ table.padded td {
 }
 
 #content a:visited {
-    color: #551a8b;
+    color: #739;
 }
 
 #content table.normal th, #content table.normal td {
@@ -259,10 +226,10 @@ table.padded td {
 #dateline {
     margin: 21px -10px 25px -25px;
     padding: 1ex 0 0 25px;
-    border-top: 1px solid #dfab79;
-    color: #a2a0a1;
+    border-top: 1px solid #333;
+    color: #aaa;
 }
 
 #dateline a, #dateline a:visited {
-    color: black;
+    color: #a98;
 }

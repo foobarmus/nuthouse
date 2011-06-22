@@ -268,7 +268,6 @@ COPY file (path) FROM stdin;
 COPY code (name, val, comment) FROM stdin;
 menu_item	forum	\N
 menu_item	site index	\N
-logo_file_id	1	\N
 \.
 
 COPY dual (dummy) FROM stdin;
@@ -281,13 +280,14 @@ COPY level (id, name) FROM stdin;
 \.
 
 COPY level (name) FROM stdin;
-locked
-troglodyte
-plebeian
-tribune
-patrician
+banished
+legionary
+champion
+prefect
+centurion
+general
 senator
-consul
+president
 \.
 
 COPY page (name, path, content, modified, breadcrumbs) FROM stdin;

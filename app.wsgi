@@ -59,7 +59,7 @@ else:
             '/profile', 'profile',
             '/forum.*', 'bbs',
             '/post', 'post',
-            '/site index', 'site_index',
+            '/site map', 'site_map',
             '/error', 'error',
             '/create', 'create',
             '/edit', 'edit',
@@ -78,11 +78,6 @@ else:
     s = web.session.Session(app, web.session.DBStore(db, 'session'), initializer={'user':None})
     render = web.template.render(base_path + 'templates/')
     strender = StringRender(base_path + 'templates/')
-
-    logo = db.select('file',
-                     {'f':int(db.select('code', {'n':'logo_file_id'}, where='name = $n')[0].val)},
-                     where='id = $f',
-                     order='id')[0].path
     menu = [code.val for code in db.select('code', {'n':'menu_item'}, where='name = $n', order='id')]
 
 
@@ -249,7 +244,6 @@ class profile:
         return render.site(site,
                            s.user,
                            web.ctx.fullpath.strip('/'),
-                           logo,
                            str(render.breadcrumb(['Member profile: %s' % (f.user)])),
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
@@ -271,8 +265,7 @@ class bbs:
         return render.site(site,
                            s.user,
                            web.ctx.fullpath.strip('/'),
-                           logo,
-                           str(render.breadcrumb([vars['board'].name])),
+                           str(render.breadcrumb([vars['board'].name.lower()])),
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
@@ -303,7 +296,6 @@ class post:
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
-                               logo,
                                db.select('dual', vars, what='crumb($p)')[0].crumb,
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
@@ -340,7 +332,7 @@ class wiki:
                     assert page.breadcrumbs == crumbs
                     raise CanonicalUrl
                 else:
-                    # still need to generate an attribute error if there is no page, so...
+                    # still need to trigger an attribute error if there is no page, so...
                     crumbs = page.breadcrumbs
             except AssertionError:
                 raise PathMismatch('/'.join(crumbs), path)
@@ -357,21 +349,20 @@ class wiki:
             else:
                 user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
                 editable = user and (user[0].level > 4 or s.user == page.owner)
-                content = render.wiki_page(markdown.markdown(page.content.encode('ascii', 'replace')),
-                                           page and page.owner or None,
+                content = render.wiki_page(page.name,
+                                           markdown.markdown(page.content.encode('ascii', 'replace')),
+                                           page.owner,
                                            path,
                                            editable,
-                                           page and str(page.modified).split()[0] or None)
+                                           str(page.modified).split()[0])
         except (PathMismatch, CanonicalUrl), e:
             web.seeother('/%s%s' % (path, e.value and '?broadcast=%s' % urllib.quote(e.value) or ''))
         else:
-            breadcrumbs = page and (crumbs and crumbs + [page.name] or [page.name]) or (crumbs and crumbs + [path] or [path])
+            breadcrumbs = crumbs and crumbs + [path] or [path]
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
-                               logo,
-                               path == 'index' and page.name or str(render.breadcrumb(breadcrumbs)),
-                               #db.select('dual', {'p':path}, what='crumb($p)')[0].crumb,
+                               path == 'index' and 'Home' or str(render.breadcrumb(breadcrumbs)),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
                                content)
@@ -394,7 +385,6 @@ class create:
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
-                               logo,
                                str(render.breadcrumb(crumbs)),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
@@ -435,7 +425,6 @@ class edit:
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
-                               logo,
                                str(render.breadcrumb(['Edit page /%s' % f.path])),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
@@ -474,7 +463,6 @@ class blog_create:
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
-                               logo,
                                str(render.breadcrumb(['New blog post'])),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
@@ -511,7 +499,6 @@ class blog_edit:
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
-                               logo,
                                str(render.breadcrumb(['Edit blog: %s' % blog.title])),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
@@ -543,7 +530,6 @@ class upload_profile_pic:
             return render.site(site,
                                s.user,
                                web.ctx.fullpath.strip('/'),
-                               logo,
                                str(render.breadcrumb(['Upload profile pic'])),
                                menu,
                                f.has_key('broadcast') and f.broadcast or None,
@@ -609,18 +595,17 @@ class chlev:
             web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
 
-class site_index:
+class site_map:
     def GET(self):
         f = web.input()
         pages = db.select('page',
                           what="path, name, TO_CHAR(modified, 'YYYY-MM-DD HH:MI') as modified",
                           order='path')
-        content = render.site_index(pages)
+        content = render.site_map(pages)
         return render.site(site,
                            s.user,
                            web.ctx.fullpath.strip('/'),
-                           logo,
-                           str(render.breadcrumb(['Site index'])),
+                           str(render.breadcrumb(['site map'])),
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
