@@ -38,6 +38,7 @@ code {
     background: #ffc;
     border: 1px solid #999;
     font: 12px monospace;
+    color: black;
 }
 
 #wrapper {
