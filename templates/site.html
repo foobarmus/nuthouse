@@ -20,10 +20,9 @@ $if path.split('?')[0] == 'search':
 $if member:
     Welcome, <a href="/profile?user=$member">$member</a>
 $else:
-    <a href="/auth?page=$path"><img src="/static/memberlogin.jpg" alt="Log in" /></a>
+    <a href="/auth?page=$path"><img src="/static/memberlogin.png" alt="Log in" /></a>
 
 </div>
-<div id="menu">
 <form action="/search" id="cse-search-box">
   <div id="search">
     <input type="hidden" name="cx" value="$site['cx']" />
@@ -33,6 +32,7 @@ $else:
         /><input class="submit" type="submit" name="sa" value="Search" />
   </div>
 </form>
+<div id="menu">
 <ul>
 
 $for item in menu:
@@ -45,9 +45,9 @@ $for item in menu:
 
 </ul>
 </div>
-</div>
 <div id="breadcrumbs">
   <div><span>You are here:</span>&ensp;$:breadcrumbs</div>
+</div>
 </div>
 <div id="content">
 

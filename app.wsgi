@@ -195,7 +195,7 @@ class confirm_email:
             f = web.input()
             db.update('member',
                       where="name = '%s' AND id = %s" % (f.user, f.code[3:]),
-                      level=3)
+                      level=2)
             email = db.select('member', {'u':f.user}, where="name = $u")[0].email
             message = render.welcome(f.user, web.ctx.host)
             web.sendmail('Nuthouse admin <%s>' % web.config.smtp_username, email, 'thank you for registering',
@@ -248,9 +248,9 @@ class profile:
         pages = db.select('page', vars, where='owner = $u', order='path')
         slevel = db.select('member', {'m':s.user}, where='name = $m')
         slevel = slevel and slevel[0].level or 0
-        show = stow({'blog_link':(f.user == s.user) and slevel > 3,
-                     'patrician_controls':(f.user != s.user) and user.level > 2 and slevel > max(4, user.level),
-                     'consular_controls':(f.user != s.user) and user.level < 5 and slevel > 6})
+        show = stow({'blog_link':(f.user == s.user) and slevel > 2,
+                     'prefect_controls':(f.user != s.user) and user.level > 1 and slevel > max(3, user.level),
+                     'presidential_controls':(f.user != s.user) and user.level < 6 and slevel > 7})
         content = render.profile(f.user, str(user.joined).split()[0], user.level_name,
                                  blog, expand_blog, recent_posts, pages, show, user.pic)
         return render.site(site,
@@ -291,10 +291,10 @@ class post:
             vars = {'p':pid}
             if pid in [b.new_topic_post for b in db.select('board')]:
                 if not user:
-                    raise Access('Posting', 'plebeians and above. You must log in first')
-                create_access = user[0].level > 2
+                    raise Access('Posting', 'legionaries and above. You must log in first')
+                create_access = user[0].level > 1
                 if not create_access:
-                    raise Access('Posting', 'plebeians and above')
+                    raise Access('Posting', 'legionaries and above')
             find_post = db.select('post',
                                   vars,
                                   where='id = $p')
@@ -364,7 +364,7 @@ class wiki:
             else:
                 crumbs = fix_broken(crumbs)
                 user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
-                editable = user and (user[0].level > 4 or s.user == page.owner)
+                editable = user and (user[0].level > 3 or s.user == page.owner)
                 content = render.wiki_page(page.name,
                                            markdown.markdown(page.content.encode('ascii', 'replace')),
                                            page.owner,
@@ -390,10 +390,10 @@ class create:
             f = web.input()
             user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
             if not user:
-                raise Access('Creating pages', 'plebeians and above. You must log in first')
-            create_access = user[0].level > 2
+                raise Access('Creating pages', 'legionaries and above. You must log in first')
+            create_access = user[0].level > 1
             if not create_access:
-                raise Access('Creating pages', 'plebeians and above')
+                raise Access('Creating pages', 'legionaries and above')
             crumbs = f.crumbs and f.crumbs.split('/') or []
             crumbs.append('Create page /%s' % f.path)
             crumbstring = f.crumbs and f.crumbs.replace('/', ' > ') or ''
@@ -431,10 +431,10 @@ class edit:
             page = db.select('page', {'p':f.path}, where='path = $p')[0]
             user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
             if not user:
-                raise Access('Editing pages', 'plebeians and above. You must log in first')
-            edit_access = user and (user[0].level > 4 or s.user == page.owner)
+                raise Access('Editing pages', 'legionaries and above. You must log in first')
+            edit_access = user and (user[0].level > 3 or s.user == page.owner)
             if not edit_access:
-                raise Access('Editing pages owned by others', 'patricians and above')
+                raise Access('Editing pages owned by others', 'prefects and above')
             can_take = edit_access and s.user != page.owner
             breadcrumbs = page.breadcrumbs and ' > '.join(page.breadcrumbs) or ''
             content = render.wiki_form(page.name, f.path, breadcrumbs, 'edit', page.content, can_take)
@@ -471,10 +471,10 @@ class blog_create:
             f = web.input()
             user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
             if not user:
-                raise Access('Blogging', 'tribunes and above. You must log in first')
-            create_access = user[0].level > 3
+                raise Access('Blogging', 'champions and above. You must log in first')
+            create_access = user[0].level > 2
             if not create_access:
-                raise Access('Blogging', 'tribunes and above')
+                raise Access('Blogging', 'champions and above')
             content = render.blog('create', None, '', '')
             return render.site(site,
                                s.user,
@@ -503,12 +503,12 @@ class blog_edit:
             f = web.input()
             user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
             if not user:
-                raise Access('Blogging', 'tribunes and above. You must log in first')
-            create_access = user[0].level > 3
+                raise Access('Blogging', 'champions and above. You must log in first')
+            create_access = user[0].level > 2
             if not create_access:
-                raise Access('Blogging', 'tribunes and above')
+                raise Access('Blogging', 'champions and above')
             blog = db.select('blog', {'b':f.bid}, where='id = $b')[0]
-            if blog.member != s.user and user.level < 6:
+            if blog.member != s.user and user.level < 7:
                 raise Access("Editing someone else's blog is a rarely used admin function, and",
                              'senators and above')
             content = render.blog('edit', f.bid, blog.title, blog.content)
@@ -538,10 +538,10 @@ class upload_profile_pic:
             f = web.input()
             user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
             if not user:
-                raise Access('Uploading a profile picture', 'tribunes and above. You must log in first')
-            create_access = user[0].level > 3
+                raise Access('Uploading a profile picture', 'champions and above. You must log in first')
+            create_access = user[0].level > 2
             if not create_access:
-                raise Access('Uploading a profile picture', 'tribunes and above')
+                raise Access('Uploading a profile picture', 'champions and above')
             content = render.upload_profile_pic()
             return render.site(site,
                                s.user,
@@ -586,18 +586,18 @@ class chlev:
             recipient = db.select('member', {'u':f.user},
                                   where='name = $u')[0]
             if web.ctx.path == '/level_up':
-                check = stow({'level':6,
+                check = stow({'level':7,
                               'action':'Promoting members',
-                              'msg':'consuls'})
+                              'msg':'presidents'})
                 target_level = recipient.level + 1
             else:
-                check = stow({'level':max(4, recipient.level),
-                              'action':'Dispensing punishment',
-                              'msg':'patricians and above. You must be a higher level<br />than the recipient'})
+                check = stow({'level':max(3, recipient.level),
+                              'action':'Demoting members',
+                              'msg':'prefects and above. You must be a higher level<br />than the recipient'})
                 if web.ctx.path == '/lock':
                     target_level = 1
                 else:
-                    target_level = 2
+                    target_level = recipient.level - 1
             if not user:
                 raise Access(check.action, '$s. You must log in first' % check.msg)
             access = user[0].level > check.level

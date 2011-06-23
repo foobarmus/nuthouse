@@ -3,7 +3,7 @@
 body {
     text-align: center;
     font: small arial,sans-serif;
-    background: black;
+    background: #765;
     color: white;
 }
 
@@ -46,22 +46,50 @@ code {
     width: 960px;
     margin: 0 auto;
     text-align: left;
-    background: url("/static/logo.jpg") no-repeat;
+    background: #040404;
+    border: 6px solid #765;
+    -moz-border-image: url("/static/border-flare.png") 6 repeat;
+    -webkit-border-image: url("/static/border-flare.png") 6 repeat;
+    border-image: url("/static/border-flare.png") 6 repeat;
+}
+
+#header {
+    background: #040404 url("/static/logo.png") no-repeat center 20px;
 }
 
 #user {
     float: right;
-    margin: 20px 50px;
-    color: #a00;
+    margin: 20px 25px 10px;
+    color: #c00;
 }
 
 #user a {
     text-decoration: none;
-    color: #a00;
+    color: #c00;
+}
+
+#user img {
+    padding-right: 1px;
+}
+
+#search {
+    clear: both;
+    float: right;
+    margin-right: 25px;
+}
+
+#search input#q {
+    width: 177px;
+    padding-left: 3px;
+    border: 2px solid #a98;
+    -moz-border-radius:3px;
+    border-radius:3px;
+    background: white url("/static/google_custom_search_watermark.gif") left no-repeat;
 }
 
 #menu {
-    padding: 136px 0 0 65px;
+    padding: 170px 0 0;
+    text-align: center;
 }
 
 #menu ul {
@@ -72,44 +100,28 @@ code {
 
 #menu ul li {
     display: inline-block;
-    margin: 0 1em 0 0;
+    margin: 0 1.5em;
     padding: 0;
 }
 
 #menu ul li a {
-    font-weight: bold;
+    font: bold medium Arial,sans-serif;
     text-decoration: none;
-    color: #a00;
+    color: #c00;
 }
 
 #menu ul li a:hover, #menu ul li a.active {
     color: #399;
 }
 
-#search {
-    float: right;
-    margin-top: -4px;
-}
-
-#search input#q {
-    width: 197px;
-    padding-left: 3px;
-    border: 2px solid #a98;
-    -moz-border-radius:3px;
-    border-radius:3px;
-    background: white url("/static/google_custom_search_watermark.gif") left no-repeat;
-}
-
 #breadcrumbs {
     clear: both;
-    padding: 1px 65px 2px;
-    border-top: 1px solid #a00;
-    border-bottom: 1px solid #a00;
-    color: #79c;
-}
-
-#breadcrumbs div {
-    color: #ffd;
+    margin-top: 10px;
+    padding: 10px 30px 2px;
+    background: #400;
+    border-top: 1px solid #222;
+    border-bottom: 1px solid #222;
+    color: #999;
 }
 
 #breadcrumbs a {
@@ -118,7 +130,7 @@ code {
 
 #content {
     min-height: 400px;
-    padding: 0 30px 0 65px;
+    padding: 0 30px 0 30px;
 }
 
 #content table#bbs {

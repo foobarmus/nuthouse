@@ -151,29 +151,6 @@ $$
     LANGUAGE plpgsql;
 
 
-CREATE FUNCTION crumb(p_path TEXT) RETURNS TEXT
-    AS $$
-DECLARE
-    p RECORD;
-    html TEXT:='<a href="/">Home</a> <span class="caret">&gt;</span> ';
-BEGIN
-    SELECT INTO p * from page where path = p_path;
-    IF p IS NULL THEN
-        RETURN html || p_path;
-    ELSIF p.path = 'index' THEN
-        RETURN 'Home';
-    ELSIF p.breadcrumbs IS NOT NULL THEN
-        FOR i IN array_lower(p.breadcrumbs, 1)..array_upper(p.breadcrumbs, 1) LOOP
-            html := html || '<a href="/' || p.breadcrumbs[i] || '">' || INITCAP(p.breadcrumbs[i]) || '</a> <span class="caret">&gt;</span> ';
-        END LOOP;
-    END IF;
-    html := html || p.name;
-    RETURN html;
-END
-$$
-    LANGUAGE plpgsql;
-
-
 CREATE FUNCTION descendants(p_id INT, p_html TEXT) RETURNS TEXT
     AS $$
 DECLARE
