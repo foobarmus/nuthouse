@@ -25,9 +25,9 @@ $else:
 
 $if show.presidential_controls or show.prefect_controls:
     (
-    $if show.consular_controls:
+    $if show.presidential_controls:
         <a title="level up" href="/level_up?user=$user">++</a>&ensp;
-    $if show.patrician_controls:
+    $if show.prefect_controls:
         <a title="punish" href="/troglify?user=$user">&minus;&minus;</a>&ensp;
         <a title="lock account" href="/lock?user=$user">X</a>
     )
