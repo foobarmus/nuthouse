@@ -59,6 +59,7 @@ else:
             '/profile', 'profile',
             '/forum.*', 'bbs',
             '/post', 'post',
+            '/post_comment_form', 'post_comment_form',
             '/site map', 'site_map',
             '/error', 'error',
             '/create', 'create',
@@ -327,6 +328,15 @@ class post:
                   content=f.content,
                   member=s.user)
         return web.seeother('/forum?board=%s' % db.select('board', {'b':int(f.board)}, where='id = $b')[0]['short_name'])
+
+class post_comment_form:
+    def GET(self):
+        f = web.input()
+        find_post = db.select('post',
+                              {'p':int(f.pid)},
+                              where='id = $p')
+        post = find_post[0]
+        return str(render.post_comment_form(post, f.has_key('board') and f.board or None))
 
 class wiki:
     def GET(self, uri):

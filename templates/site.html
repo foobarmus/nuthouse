@@ -6,6 +6,11 @@ $def with (site, member, path, breadcrumbs, menu, broadcast, page_content)
     <title>$site['name']</title>
     <link href="/static/app.css" type="text/css" rel="stylesheet" media="all" />
     <script type="text/javascript" src="/static/cse.js"></script>
+
+$if path.split('?')[0] == 'post':
+    <script type="text/javascript" src="/static/prototype.js"></script>
+    <script type="text/javascript" src="/static/bbs.js"></script>
+
 </head>
 <body
 

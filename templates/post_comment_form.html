@@ -1,0 +1,33 @@
+$def with (post, board)
+
+<form name="post" action="post" method="post">
+<fieldset>
+<legend>post details</legend>
+<label for="title">Subject</label>
+<input class="text" name="subject" id="subject"
+$if post:
+    $if post.subject.lower().find('re:') != -1:
+        value="$post.subject"
+    $else:
+        value="Re: $post.subject"
+/><br /><br />
+<label for="body">Body (you can use
+<a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>
+here)</label><br />
+<textarea class="text area_wide" name="content"></textarea>
+</fieldset>
+<input type="submit"
+$if post:
+    value="post comment"
+$else:
+    value="post"
+/>
+$if post:
+    <input type="hidden" name="board" value="$post.board" />
+    <input type="hidden" name="parent" value="$post.id" />
+$else:
+    $if board:
+        <input type="hidden" name="board" value="$board" />
+    $else:
+        <input type="hidden" name="board" value="1" />
+</form>
