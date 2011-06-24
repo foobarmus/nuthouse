@@ -344,7 +344,7 @@ class wiki:
                     assert page.breadcrumbs == crumbs
                     raise CanonicalUrl
                 else:
-                    crumbs = (f.has_key('crumbs') and f.crumbs) and [f.crumbs] or page.breadcrumbs
+                    crumbs = (f.has_key('crumbs') and f.crumbs) and f.crumbs.split('/') or page.breadcrumbs
                     if not page:
                         raise AttributeError
             except AssertionError:
