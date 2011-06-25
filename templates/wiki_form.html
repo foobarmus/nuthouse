@@ -9,6 +9,8 @@ $def with (name, path, crumbs, action, content, can_take)
 
 $if name:
     value="$name"
+$else:
+    value="$path.title()"
 
 />
 <input name="crumbs" id="crumbs" type="hidden" value="$crumbs" />
