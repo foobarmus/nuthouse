@@ -1,0 +1,11 @@
+$def with (name, crumbs)
+
+<label for="name">Page title</label>
+<input name="name" id="name" class="text"
+
+$if name:
+    value="$name"
+
+/><br /><br />
+<label for="crumbs">Breadcrumbs</label>
+<input name="crumbs" id="crumbs" value="$crumbs" class="text" />

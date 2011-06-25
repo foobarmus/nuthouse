@@ -63,6 +63,7 @@ else:
             '/site map', 'site_map',
             '/error', 'error',
             '/create', 'create',
+            '/wiki_form_advanced_options', 'wiki_form_advanced_options',
             '/edit', 'edit',
             '/blog_create', 'blog_create',
             '/blog_edit', 'blog_edit',
@@ -432,6 +433,12 @@ class create:
                                   owner=s.user)''' % bread
         eval(insert_str)
         return web.seeother('/%s' % f.path)
+
+
+class wiki_form_advanced_options:
+    def GET(self):
+        f = web.input()
+        return str(render.wiki_form_advanced_options(f.name, f.crumbstring))
 
 
 class edit:

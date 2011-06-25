@@ -172,6 +172,10 @@ code {
     color: white;
 }
 
+#content #comment_form {
+    margin: 1em 0;
+}
+
 #content table#profile th, #content table#profile td {
     vertical-align: top;
     text-align: left;

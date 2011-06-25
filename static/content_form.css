@@ -5,4 +5,5 @@ form .area_wide {width: 450px; height: 240px; padding: 3px;}
 legend {display: none}
 fieldset {margin: 2em auto; border: none;}
 #broadcast {color: red;}
+#advanced {margin-bottom: 1em;}
 .failed {background: #f99;}

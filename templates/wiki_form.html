@@ -3,15 +3,16 @@ $def with (name, path, crumbs, action, content, can_take)
 <form name="wiki_page" action="$action" method="post">
 <fieldset>
 <legend>Page details</legend>
-<label for="name">Page title</label>
-<input name="name" id="name" class="text"
+<div id="advanced">
+<a href="#">show advanced options</a>
+<input name="name" id="name" type="hidden"
 
 $if name:
     value="$name"
 
-/><br /><br />
-<label for="crumbs">Breadcrumbs</label>
-<input name="crumbs" id="crumbs" value="$crumbs" class="text" /><br /><br />
+/>
+<input name="crumbs" id="crumbs" type="hidden" value="$crumbs" />
+</div>
 <label for="content_field">
     Content (you can use <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>)
 </label><br />
