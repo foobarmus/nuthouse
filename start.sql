@@ -10,6 +10,7 @@ CREATE TABLE board (
 );
 
 
+
 CREATE TABLE code (
     id SERIAL PRIMARY KEY,
     name TEXT,
@@ -40,10 +41,12 @@ CREATE TABLE member (
     name TEXT UNIQUE,
     password TEXT,
     email TEXT UNIQUE,
-    level SMALLINT DEFAULT 0 REFERENCES LEVEL,
+    bike TEXT,
+    chapter SMALLINT,
+    level SMALLINT DEFAULT 0 REFERENCES level,
+    pic INT,
     terms_accepted BOOLEAN DEFAULT FALSE,
-    joined TIMESTAMP DEFAULT NOW(),
-    pic INT
+    joined TIMESTAMP DEFAULT NOW()
 );
 
 
@@ -85,6 +88,18 @@ CREATE TABLE post (
     content TEXT,
     member TEXT REFERENCES member(name),
     posted TIMESTAMP DEFAULT NOW()
+);
+
+
+CREATE TABLE chapter (
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    centurion TEXT REFERENCES member(name),
+    board INT REFERENCES board,
+    blurb TEXT,
+    pic INT,
+    founder TEXT REFERENCES member(name),
+    founded DATE DEFAULT now()
 );
 
 

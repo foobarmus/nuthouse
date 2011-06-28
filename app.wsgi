@@ -67,6 +67,7 @@ else:
             '/edit', 'edit',
             '/blog_create', 'blog_create',
             '/blog_edit', 'blog_edit',
+            '/chapter/(.+)', 'chapter',
             '/upload_profile_pic', 'upload_profile_pic',
             '/level_up', 'chlev',
             '/troglify', 'chlev',
@@ -216,38 +217,35 @@ class forgot:
 class profile:
     def GET(self):
         f = web.input()
-        vars = {'u':f.user}
-        user = db.select('member m LEFT JOIN file f ON m.pic = f.id, level l', vars,
+        vars_ = {'u':f.user}
+        user = db.select('member m LEFT JOIN file f ON m.pic = f.id, level l', vars_,
                          what='joined, l.id AS level, l.name AS level_name, path AS pic',
                          where='m.level = l.id AND m.name = $u')[0]
         if f.has_key('expand_blog') and f.expand_blog == 't':
             blog = None
-            expand_blog_iter = db.select('blog', vars,
-                                         what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
-                                         where='member = $u',
-                                         order='posted DESC', limit=10)
-            expand_blog = [stow({'id':b.id,
-                                 'title':b.title,
-                                 'posted':b.posted,
-                                 'content':markdown.markdown(b.content.encode('ascii', 'replace'))})
-                           for b in expand_blog_iter]
+            expand_blog = list(db.select('blog', vars_,
+                                          what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
+                                          where='member = $u',
+                                          order='posted DESC', limit=10))
+            for i in range(len(expand_blog)):
+                expand_blog[i].content = markdown.markdown(expand_blog[i].content.encode('ascii', 'replace'))
         else:
-            if db.select('blog', vars, what='count(*)', where='member = $u')[0].count > 1:
+            if db.select('blog', vars_, what='count(*)', where='member = $u')[0].count > 1:
                 expand_blog = False
             else:
                 expand_blog = None
-            blog = db.select('blog', vars,
+            blog = db.select('blog', vars_,
                               what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
                               where='member = $u',
                               order='posted DESC', limit=1)
             if blog:
                 blog = blog[0]
                 blog.content = markdown.markdown(blog.content.encode('ascii', 'replace'))
-        recent_posts = db.select('post', vars,
+        recent_posts = db.select('post', vars_,
                                  what="id, subject",
                                  where="member = $u AND posted > (NOW() - interval '3 months')",
                                  order='posted DESC', limit=5)
-        pages = db.select('page', vars, where='owner = $u', order='path')
+        pages = db.select('page', vars_, where='owner = $u', order='path')
         slevel = db.select('member', {'m':s.user}, where='name = $m')
         slevel = slevel and slevel[0].level or 0
         show = stow({'blog_link':(f.user == s.user) and slevel > 2,
@@ -338,6 +336,54 @@ class post_comment_form:
                               where='id = $p')
         post = find_post[0]
         return str(render.post_comment_form(post, f.has_key('board') and f.board or None))
+
+class chapter:
+    def GET(self, uri):
+        f = web.input()
+        chapter = db.select('chapter', {'c':uri.lower()}, where='lower(name) = $c')[0]
+        chapter.founded = chapter.founded.strftime('%B %Y')
+        chapter.blurb = markdown.markdown(chapter.blurb.encode('ascii', 'replace'))
+        bikes = list(db.select('member', {'c':chapter.id}, what='bike, count(bike)', where='chapter = $c', order='bike', group='bike'))
+        vars_ = {'u':chapter.centurion}
+        if f.has_key('expand_blog') and f.expand_blog == 't':
+            blog = None
+            expand_blog = list(db.select('blog', vars_,
+                                          what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
+                                          where='member = $u',
+                                          order='posted DESC', limit=10))
+            for i in range(len(expand_blog)):
+                expand_blog[i].content = markdown.markdown(expand_blog[i].content.encode('ascii', 'replace'))
+        else:
+            if db.select('blog', vars_, what='count(*)', where='member = $u')[0].count > 1:
+                expand_blog = False
+            else:
+                expand_blog = None
+            blog = db.select('blog', vars_,
+                              what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
+                              where='member = $u',
+                              order='posted DESC', limit=1)
+            if blog:
+                blog = blog[0]
+                blog.content = markdown.markdown(blog.content.encode('ascii', 'replace'))
+        user = db.select('member', {'u':s.user}, where='name = $u')[0]
+        can_join = user.bike and not user.chapter
+        content = render.chapter(chapter,
+                                 sum(b.count for b in bikes),
+                                 bikes,
+                                 blog,
+                                 expand_blog,
+                                 False,
+                                 stow({'centurion_controls':s.user == chapter.centurion}),
+                                 False,
+                                 can_join)
+        return render.site(site,
+                           s.user,
+                           web.ctx.fullpath.strip('/'),
+                           str(render.breadcrumb(['chapters', chapter.name])),
+                           menu,
+                           f.has_key('broadcast') and f.broadcast or None,
+                           content)
+
 
 class wiki:
     def GET(self, uri):

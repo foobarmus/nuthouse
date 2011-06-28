@@ -1,0 +1,81 @@
+$def with (chapter, members, bikes, blog, expand_blog, recent_events, show, pic, can_join)
+
+<h2>$chapter.name Chapter</h2>
+<div id="chapter-wrap">
+<table id="profile">
+<tr>
+    <th><div>Founded</div></th>
+    <td>$chapter.founded
+
+$if chapter.founder != chapter.centurion:
+    by <a href="/profile?user=$chapter.founder">$chapter.founder</a>
+
+</td>
+</tr>
+<tr>
+    <th><div>Members</div></th>
+    <td>
+        $members
+    </td>
+</tr>
+<tr>
+    <th><div>Leader</div></th>
+    <td><a href="/profile?user=$chapter.centurion">$chapter.centurion</a></td>
+</tr>
+<tr>
+    <th><div>Bikes</div></th>
+    <td>
+
+$for bike in bikes:
+    $bike.bike
+    $if bike.count > 1:
+        ($bike.count)
+    <br />
+
+</td>
+</tr>
+
+$if can_join:
+    <tr><th></th>
+    <td><a href="join?chapter=$chapter.name">join this chapter</a></td>
+    </tr>
+
+</table>
+
+
+<div id="chapter-pic"
+
+$if pic:
+    style="background: url(/static/upload/$pic) center center no-repeat"
+
+>
+
+$if show.centurion_controls:
+    <a href="upload_chapter_details">&nbsp;</a>
+$else:
+    &nbsp;
+
+</div>
+<div id="chapter-blurb">
+$:chapter.blurb
+</div>
+
+$if blog:
+    <h4>$blog.posted</h4>
+    <div><strong>$blog.title</strong></div>
+    $:blog.content
+    $if expand_blog == False:
+        <p><a href="/profile?user=$user&expand_blog=t">show prior entries</a></p>
+
+$if expand_blog:
+    $for b in expand_blog:
+        <h4>$b.posted</h4>
+        <div><strong>$b.title</strong></div>
+        $:b.content
+
+$if recent_events:
+    <h3>Recent events</h3>
+    $for event in recent_events:
+        <p><strong>$event.date</strong> $event.name</p>
+
+</div>

@@ -193,7 +193,7 @@ code {
 
 #content table#profile #pic {
     margin-bottom: 20px;
-    background: url("/static/alien.png") no-repeat center center;
+    background: #399 url("/static/alien.png") no-repeat center center;
 }
 
 #pic a {
@@ -208,6 +208,43 @@ code {
 
 #content table#profile td table td {
     padding-bottom: 3px;
+}
+
+#chapter-wrap {
+    margin-top: 1em;
+}
+
+#chapter-wrap table {
+    float: right;
+    width: 350px;
+}
+
+#chapter-wrap table#profile th {
+    width: 70px;
+}
+
+#chapter-wrap table#profile th div {
+    min-height: 40px;
+}
+
+#chapter-blurb {
+    clear: left;
+}
+
+#content #chapter-pic {
+    width: 500px;
+    height: 375px;
+    background: #399 url("/static/aliens.png") no-repeat 120px center;
+}
+
+#chapter-pic a {
+    display: block;
+    float: left;
+    width: 500px;
+    height: 375px;
+    opacity: 0;
+    filter:alpha(opacity=0);
+    -moz-opacity: 0;
 }
 
 table.padded th {
