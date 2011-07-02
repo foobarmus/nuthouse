@@ -1,7 +1,7 @@
 $def with (site, member, path, breadcrumbs, menu, broadcast, page_content)
 
 <!DOCTYPE html>
-<html  xmlns="http://www.w3.org/1999/xhtml">  
+<html>
 <head>
     <title>$site['name']</title>
     <link href="/static/app.css" type="text/css" rel="stylesheet" media="all" />
@@ -12,6 +12,8 @@ $if path.split('?')[0] == 'post':
     <script type="text/javascript" src="/static/bbs.js"></script>
 $elif path.split('?')[0] in ['create', 'edit']:
     <script type="text/javascript" src="/static/wiki.js"></script>
+$elif path.split('?')[0] == 'join':
+    <script type="text/javascript" src="/static/val.js"></script>
 
 </head>
 <body

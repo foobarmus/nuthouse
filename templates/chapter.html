@@ -1,4 +1,4 @@
-$def with (chapter, members, bikes, blog, expand_blog, recent_events, show, pic, can_join)
+$def with (chapter, members, bikes, blog, expand_blog, recent_events, show, can_join)
 
 <h2>$chapter.name Chapter</h2>
 <div id="chapter-wrap">
@@ -37,7 +37,7 @@ $for bike in bikes:
 
 $if can_join:
     <tr><th></th>
-    <td><a href="join?chapter=$chapter.name">join this chapter</a></td>
+    <td><a href="/join?chapter=$chapter.name">join this chapter</a></td>
     </tr>
 
 </table>
@@ -45,13 +45,13 @@ $if can_join:
 
 <div id="chapter-pic"
 
-$if pic:
-    style="background: url(/static/upload/$pic) center center no-repeat"
+$if chapter.pic:
+    style="background: url(/static/upload/$chapter.pic) center center no-repeat"
 
 >
 
 $if show.centurion_controls:
-    <a href="upload_chapter_details">&nbsp;</a>
+    <a href="/edit_chapter_details?chapter=$chapter.name">&nbsp;</a>
 $else:
     &nbsp;
 
@@ -61,8 +61,7 @@ $:chapter.blurb
 </div>
 
 $if blog:
-    <h4>$blog.posted</h4>
-    <div><strong>$blog.title</strong></div>
+    <h4>$blog.posted &mdash; $blog.title</h4>
     $:blog.content
     $if expand_blog == False:
         <p><a href="/profile?user=$user&expand_blog=t">show prior entries</a></p>

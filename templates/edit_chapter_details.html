@@ -1,0 +1,17 @@
+$def with (chapter)
+
+<form name="edit_chapter" action="edit_chapter_details" enctype="multipart/form-data" method="post">
+    <fieldset>
+        <legend>Upload new pic</legend>
+        <label for="file">Jpeg, png or gif, please...</label>
+        <input name="file" id="file" type="file" /><br /><br />
+        Image will be cropped to 500 x 375 pixels.<br />
+        Leave blank to keep current picture.<br /><br />
+        <label for="blurb">
+            Blurb (you can use <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>)
+        </label><br />
+        <textarea name="blurb" id="blurb" class="text area_wide">$:chapter.blurb</textarea>
+    </fieldset>
+    <input name="chapter" type="hidden" value="$chapter.name" />
+    <input type="submit" value="save details" />
+</form>

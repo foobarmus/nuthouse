@@ -1,0 +1,11 @@
+$def with (chapter)
+
+<form name="join_chapter" action="/join" method="post">
+    <fieldset>
+        <legend>Your Bike</legend>
+        <label for="bike" id="bike-label">Please enter the make and model of your bike</label><br />
+        <input name="bike" id="bike" class="text required" /><br /><br />
+    </fieldset>
+    <input name="chapter" type="hidden" value="$chapter" />
+    <input type="submit" value="join chapter: $chapter" />
+</form>

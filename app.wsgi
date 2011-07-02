@@ -60,6 +60,9 @@ else:
             '/forum.*', 'bbs',
             '/post', 'post',
             '/post_comment_form', 'post_comment_form',
+            '/edit_chapter_details', 'edit_chapter_details',
+            '/chapter/(.+)', 'chapter',
+            '/join', 'join',
             '/site map', 'site_map',
             '/error', 'error',
             '/create', 'create',
@@ -67,7 +70,6 @@ else:
             '/edit', 'edit',
             '/blog_create', 'blog_create',
             '/blog_edit', 'blog_edit',
-            '/chapter/(.+)', 'chapter',
             '/upload_profile_pic', 'upload_profile_pic',
             '/level_up', 'chlev',
             '/troglify', 'chlev',
@@ -340,7 +342,10 @@ class post_comment_form:
 class chapter:
     def GET(self, uri):
         f = web.input()
-        chapter = db.select('chapter', {'c':uri.lower()}, where='lower(name) = $c')[0]
+        chapter = db.select('chapter c LEFT JOIN file f ON c.pic = f.id',
+                            {'c':uri.lower()},
+                            what='c.id, name, founder, founded, centurion, blurb, path AS pic',
+                            where='lower(name) = $c')[0]
         chapter.founded = chapter.founded.strftime('%B %Y')
         chapter.blurb = markdown.markdown(chapter.blurb.encode('ascii', 'replace'))
         bikes = list(db.select('member', {'c':chapter.id}, what='bike, count(bike)', where='chapter = $c', order='bike', group='bike'))
@@ -365,8 +370,12 @@ class chapter:
             if blog:
                 blog = blog[0]
                 blog.content = markdown.markdown(blog.content.encode('ascii', 'replace'))
-        user = db.select('member', {'u':s.user}, where='name = $u')[0]
-        can_join = user.bike and not user.chapter
+        user = db.select('member', {'u':s.user}, where='name = $u')
+        if user:
+            user = user[0]
+            can_join = user.bike and not user.chapter
+        else:
+            can_join = False
         content = render.chapter(chapter,
                                  sum(b.count for b in bikes),
                                  bikes,
@@ -374,7 +383,6 @@ class chapter:
                                  expand_blog,
                                  False,
                                  stow({'centurion_controls':s.user == chapter.centurion}),
-                                 False,
                                  can_join)
         return render.site(site,
                            s.user,
@@ -641,6 +649,74 @@ class upload_profile_pic:
             web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
 
+class edit_chapter_details:
+    def GET(self):
+        try:
+            f = web.input()
+            user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
+            if not user:
+                raise Access('Editing chapter details', 'the chapter leader. You must log in first')
+            edit_access = user[0].level > 2
+            if not edit_access:
+                raise Access('Editing chapter details', 'the chapter leader')
+            chapter = db.select('chapter', {'c':f.chapter}, where='name = $c')[0]
+            content = render.edit_chapter_details(chapter)
+            return render.site(site,
+                               s.user,
+                               web.ctx.fullpath.strip('/'),
+                               str(render.breadcrumb(['chapters', chapter.name, 'Edit details'])),
+                               menu,
+                               f.has_key('broadcast') and f.broadcast or None,
+                               content)
+        except Access, e:
+            web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote(web.ctx.fullpath.strip('/')))
+        except:
+            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
+
+    def POST(self):
+        try:
+            f = web.input(file={})
+            if f.file.type not in ['image/jpeg', 'image/png', 'image/gif']:
+                raise FileType
+            filename = db.select('dual', what="nextval('file_id_seq') AS id")[0].id
+            ext = f.file.filename.rsplit('.', 1)[1]
+            file = open(base_path + 'static/upload/%s.%s' % (filename, ext), 'w')
+            file.write(f.file.file.read())
+            file.close()
+            db.insert('file',
+                      id=filename,
+                      path='%s.%s' % (filename, ext))
+            db.update('chapter',
+                      where="name = '%s'" % f.chapter,
+                      pic=filename,
+                      blurb=f.blurb)
+            return web.seeother('/chapter/%s' % f.chapter)
+        except FileType, e:
+            web.seeother('/edit_chapter_details?chapter=%s&broadcast=%s' % (f.chapter, e.value))
+        except:
+            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
+
+class join:
+    def GET(self):
+        f = web.input()
+        content = render.join(f.chapter)
+        return render.site(site,
+                           s.user,
+                           web.ctx.fullpath.strip('/'),
+                           str(render.breadcrumb(['chapters', f.chapter, 'join'])),
+                           menu,
+                           f.has_key('broadcast') and f.broadcast or None,
+                           content)
+
+    def POST(self):
+        f = web.input()
+        chapter = db.select('chapter', {'c':f.chapter}, where='name = $c')[0]
+        db.update('member',
+                  where="name = '%s'" % s.user,
+                  bike=f.bike,
+                  chapter=chapter.id)
+        return web.seeother('/chapter/%s' % f.chapter)
+        
 class chlev:
     def GET(self):
         try:
