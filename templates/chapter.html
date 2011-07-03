@@ -64,7 +64,7 @@ $if blog:
     <h4>$blog.posted &mdash; $blog.title</h4>
     $:blog.content
     $if expand_blog == False:
-        <p><a href="/profile?user=$user&expand_blog=t">show prior entries</a></p>
+        <p><a href="/chapter/$chapter.name?expand_blog=t">show prior entries</a></p>
 
 $if expand_blog:
     $for b in expand_blog:
