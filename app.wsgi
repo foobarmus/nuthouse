@@ -373,7 +373,7 @@ class chapter:
         user = db.select('member', {'u':s.user}, where='name = $u')
         if user:
             user = user[0]
-            can_join = user.bike and not user.chapter
+            can_join = not user.chapter
         else:
             can_join = False
         content = render.chapter(chapter,
