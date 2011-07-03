@@ -68,8 +68,7 @@ $if blog:
 
 $if expand_blog:
     $for b in expand_blog:
-        <h4>$b.posted</h4>
-        <div><strong>$b.title</strong></div>
+        <h4>$b.posted &mdash; $b.title</h4>
         $:b.content
 
 $if recent_events:
