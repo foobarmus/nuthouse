@@ -279,7 +279,8 @@ prefect
 centurion
 general
 senator
-president
+founder
+founder
 \.
 
 COPY page (name, path, content, modified, breadcrumbs) FROM stdin;
