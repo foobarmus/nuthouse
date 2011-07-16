@@ -8,5 +8,7 @@ $for crumb in crumbs:
     $else:
         $if isinstance(crumb, tuple):
             <a href="/$crumb[0]?crumbs=$crumb[1]">$crumb[0]</a>
+        $elif isinstance(crumb, list):
+            <a href="$crumb[1]">$crumb[0]</a>
         $else:
             <a href="/$crumb">$crumb</a>

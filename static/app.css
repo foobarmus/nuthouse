@@ -179,31 +179,44 @@ code {
 #content table#profile th, #content table#profile td {
     vertical-align: top;
     text-align: left;
-    padding: 0 20px 10px 0;
+    padding: 0 20px 40px 0;
 }
 
 #content table#profile th {
-    width: 100px;
+    width: 250px;
 }
 
 #content table#profile th div {
-    width: 100%;
-    min-height: 110px;
+    width: 100px;
+    padding-left: 150px;
 }
 
-#content table#profile #pic {
+#content table#profile #add-pics {
+    width: 100%;
+    min-height: 250px;
     margin-bottom: 20px;
+    padding-left: 0;
     background: #399 url("/static/alien.png") no-repeat center center;
 }
 
-#pic a {
+#content table#profile #add-pics a {
     display: block;
     float: left;
-    width: 100px;
-    height: 110px;
+    width: 250px;
+    height: 250px;
     opacity: 0;
     filter:alpha(opacity=0);
     -moz-opacity: 0;
+}
+
+#content table#profile td#stats div.pushed-up {
+    margin-top: -64px;
+}
+
+#content table#profile td#stats div#gallery-link {
+    position: relative;
+    top: 201px;
+    margin-top: 0;
 }
 
 #content table#profile td table td {
@@ -219,25 +232,31 @@ code {
     width: 350px;
 }
 
+#chapter-wrap table#profile th, #content table#profile td {
+    padding-bottom: 10px;
+}
+
 #chapter-wrap table#profile th {
     width: 70px;
 }
 
 #chapter-wrap table#profile th div {
     min-height: 40px;
+    width: 100%;
+    padding-left: 0;
 }
 
 #chapter-blurb {
     clear: left;
 }
 
-#content #chapter-pic {
+#chapter-wrap #add-pics {
     width: 500px;
     height: 375px;
     background: #399 url("/static/aliens.png") no-repeat 120px center;
 }
 
-#chapter-pic a {
+#chapter-wrap #add-pics a {
     display: block;
     float: left;
     width: 500px;

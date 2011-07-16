@@ -2,31 +2,11 @@ import sys
 import urllib
 import urlparse
 import os
+import Image
+import StringIO
 
 import web
 import markdown
-
-
-# local webpy mods
-
-class TemplateString(web.template.Template):
-
-    def __call__(self, *a, **kw):
-        out = self.t(*a, **kw)
-        return str(self._join_output(out))
-        
-class StringRender(web.template.Render):
-        
-    def _load_template(self, name):
-        path = os.path.join(self._loc, name)
-        if os.path.isdir(path):
-            return StringRender(path, **self._keywords)
-        else:
-            path = self._findfile(path)
-            if path:
-                return TemplateString(open(path).read(), filename=path, **self._keywords)
-            else:
-                raise AttributeError, 'No template named ' + name            
 
 
 # app init
@@ -57,10 +37,10 @@ else:
             '/confirm_email', 'confirm_email',
             '/forgot', 'forgot',
             '/profile', 'profile',
+            '/gallery', 'gallery',
             '/forum.*', 'bbs',
             '/post', 'post',
             '/post_comment_form', 'post_comment_form',
-            '/edit_chapter_details', 'edit_chapter_details',
             '/chapter/(.+)', 'chapter',
             '/join', 'join',
             '/site map', 'site_map',
@@ -70,7 +50,7 @@ else:
             '/edit', 'edit',
             '/blog_create', 'blog_create',
             '/blog_edit', 'blog_edit',
-            '/upload_profile_pic', 'upload_profile_pic',
+            '/upload_pic', 'upload_pic',
             '/level_up', 'chlev',
             '/troglify', 'chlev',
             '/lock', 'chlev',
@@ -82,7 +62,6 @@ else:
     stow = web.utils.storage
     s = web.session.Session(app, web.session.DBStore(db, 'session'), initializer={'user':None})
     render = web.template.render(base_path + 'templates/')
-    strender = StringRender(base_path + 'templates/')
     menu = [code.val for code in db.select('code', {'n':'menu_item'}, where='name = $n', order='id')]
 
 def fix_broken(crumbs):
@@ -191,23 +170,18 @@ class register:
 #        except UserExists, e:
 #            web.seeother('/register?broadcast=%s&amp;user=%s'
 #                         % (e.value, f.user))
-#        except:
-#            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
 class confirm_email:
     def GET(self):
-        try:
-            f = web.input()
-            db.update('member',
-                      where="name = '%s' AND id = %s" % (f.user, f.code[3:]),
-                      level=2)
-            email = db.select('member', {'u':f.user}, where="name = $u")[0].email
-            message = render.welcome(f.user, web.ctx.host)
-            web.sendmail('Nuthouse admin <%s>' % web.config.smtp_username, email, 'thank you for registering',
-                         message, headers=({'Content-Type':'text/html; charset=UTF-8'}))
-            web.seeother('/auth?broadcast=Registration complete')
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
+        f = web.input()
+        db.update('member',
+                  where="name = '%s' AND id = %s" % (f.user, f.code[3:]),
+                  level=2)
+        email = db.select('member', {'u':f.user}, where="name = $u")[0].email
+        message = render.welcome(f.user, web.ctx.host)
+        web.sendmail('Nuthouse admin <%s>' % web.config.smtp_username, email, 'thank you for registering',
+                     message, headers=({'Content-Type':'text/html; charset=UTF-8'}))
+        web.seeother('/auth?broadcast=Registration complete')
 
 class forgot:
     def GET(self):
@@ -252,7 +226,8 @@ class profile:
         slevel = slevel and slevel[0].level or 0
         show = stow({'blog_link':(f.user == s.user) and slevel > 2,
                      'prefect_controls':(f.user != s.user) and user.level > 1 and slevel > max(3, user.level),
-                     'presidential_controls':(f.user != s.user) and user.level < 6 and slevel > 7})
+                     'presidential_controls':(f.user != s.user) and user.level < 6 and slevel > 7,
+                     'gallery':True})
         content = render.profile(f.user, str(user.joined).split()[0], user.level_name,
                                  blog, expand_blog, recent_posts, pages, show, user.pic)
         return render.site(site,
@@ -316,8 +291,6 @@ class post:
                                content)
         except Access, e:
             web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote('post?pid=%s' % pid))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
     def POST(self):
         f = web.input()
@@ -399,8 +372,9 @@ class wiki:
         path = web.ctx.path.split('/')
         crumbs = path[1:-1]
         path = path and path[-1] or 'index'
+        vars_ = {'p':path}
         find_page = db.select('page',
-                              {'p':path},
+                              vars_,
                               where='path = $p')
         page = find_page and find_page[0] or None
         try:
@@ -415,17 +389,21 @@ class wiki:
             except AssertionError:
                 raise PathMismatch('/'.join(crumbs), path)
             except AttributeError:
-                if not crumbs:
-                    referer = urllib.unquote_plus(urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]).strip('/')
-                    actual = db.select('page', {'r':referer}, where='path = $r')
-                    if referer and actual:
-                        parent_page = referer != 'auth' and actual[0] or None
-                        crumbs = parent_page and parent_page.breadcrumbs or []
-                        crumbs.append(referer.strip('/'))
-                    else:
-                        crumbs = []
-                crumbs = fix_broken(crumbs)
-                content = render.big_fat_404(path, '/'.join(isinstance(c, tuple) and c[0] or c for c in crumbs))
+                member = db.select('member', vars_, where='name = $p')
+                if member:
+                    return web.seeother('/profile?user=%s' % member[0].name)
+                else:
+                    if not crumbs:
+                        referer = urllib.unquote_plus(urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]).strip('/')
+                        actual = db.select('page', {'r':referer}, where='path = $r')
+                        if referer and actual:
+                            parent_page = referer != 'auth' and actual[0] or None
+                            crumbs = parent_page and parent_page.breadcrumbs or []
+                            crumbs.append(referer.strip('/'))
+                        else:
+                            crumbs = []
+                    crumbs = fix_broken(crumbs)
+                    content = render.big_fat_404(path, '/'.join(isinstance(c, tuple) and c[0] or c for c in crumbs))
             else:
                 crumbs = fix_broken(crumbs)
                 user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
@@ -472,8 +450,6 @@ class create:
                                content)
         except Access, e:
             web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote(web.ctx.fullpath.strip('/')))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
     def POST(self):
         f = web.input()
@@ -518,8 +494,6 @@ class edit:
                                content)
         except Access, e:
             web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote(web.ctx.fullpath.strip('/')))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
     def POST(self):
         f = web.input()
@@ -556,8 +530,6 @@ class blog_create:
                                content)
         except Access, e:
             web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote(web.ctx.fullpath.strip('/')))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
     def POST(self):
         f = web.input()
@@ -592,8 +564,6 @@ class blog_edit:
                                content)
         except Access, e:
             web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote(web.ctx.fullpath.strip('/')))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
     def POST(self):
         f = web.input()
@@ -603,98 +573,74 @@ class blog_edit:
         return web.seeother('/profile?user=%s' % s.user)
 
 
-class upload_profile_pic:
+class upload_pic:
     def GET(self):
         try:
             f = web.input()
             user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
             if not user:
-                raise Access('Uploading a profile picture', 'champions and above. You must log in first')
+                raise Access('Uploading pictures', 'champions and above. You must log in first')
             create_access = user[0].level > 2
             if not create_access:
-                raise Access('Uploading a profile picture', 'champions and above')
-            content = render.upload_profile_pic()
-            return render.site(site,
-                               s.user,
-                               web.ctx.fullpath.strip('/'),
-                               str(render.breadcrumb(['Upload profile pic'])),
-                               menu,
-                               f.has_key('broadcast') and f.broadcast or None,
-                               content)
+                raise Access('Uploading pictures', 'champions and above')
+            referer = urllib.unquote_plus(urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]).strip('/').split('/')
+            collection = referer[0]
+            help_text = blurb = ''
+            if referer[0] == 'profile':
+                help_text =  'Square pics work best.'
+            elif referer[0] in ['chapter', 'event']:
+                if referer[0] == 'chapter':
+                    help_text = 'Leave blank to keep current picture.'
+                    referer[1] = db.select('chapter', {'c':referer[1].lower()}, where='lower(name) = $c')[0].id
+                obj = db.select(referer[0], {'id':referer[1]}, where='id = $id')[0]
+                collection += '#%s' % referer[1]
+                if referer[0] == 'chapter':
+                    blurb = obj.blurb
+            return render.upload_pic(collection, help_text, blurb)
         except Access, e:
-            web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote(web.ctx.fullpath.strip('/')))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
+            web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote('/'.join(referer)))
 
     def POST(self):
         try:
             f = web.input(file={})
-            if f.file.type not in ['image/jpeg', 'image/png', 'image/gif']:
-                raise FileType
-            filename = db.select('dual', what="nextval('file_id_seq') AS id")[0].id
-            ext = f.file.filename.rsplit('.', 1)[1]
-            file = open(base_path + 'static/upload/%s.%s' % (filename, ext), 'w')
-            file.write(f.file.file.read())
-            file.close()
-            db.insert('file',
-                      id=filename,
-                      path='%s.%s' % (filename, ext))
-            db.update('member',
-                      where="name = '%s'" % s.user,
-                      pic=filename)
-            return web.seeother('/profile?user=%s' % s.user)
+            if f.file.filename: #TODO: should also actually fire when there is no file, but the collection is something other than chapter
+                if f.file.type not in ['image/jpeg', 'image/png', 'image/gif']:
+                    raise FileType
+                filename = db.select('dual', what="nextval('file_id_seq') AS id")[0].id
+                ext = f.file.filename.rsplit('.', 1)[1]
+                img = Image.open(StringIO.StringIO(f.file.file.read()))
+                size = f.collection == 'profile' and (300, 300) or (600,600)
+                img.thumbnail(size, Image.ANTIALIAS)
+                img.save('%sstatic/upload/%s.%s' % (base_path, filename, ext))
+                db.insert('file',
+                          id=filename,
+                          path='%s.%s' % (filename, ext),
+                          collection=f.collection,
+                          uploader=s.user)
+            if f.collection == 'profile':
+                db.update('member',
+                          where="name = '%s'" % s.user,
+                          pic=filename)
+                redirect_to = '/profile?user=%s' % s.user
+            elif f.collection == 'gallery':
+                redirect_to = '/gallery?user=%s' % s.user
+            else:
+                type_, id_ = f.collection.split('#', 1)
+                vars_ = {'id':id_}
+                if type_ == 'chapter':
+                    updates = {'blurb':f.blurb}
+                    if f.file.filename:
+                        updates['pic'] = filename
+                    db.update('chapter',
+                              where='id = $id',
+                              vars=vars_,
+                              **updates)
+                    chapter = db.select('chapter', vars_, where='id = $id')[0]
+                    redirect_to = '/chapter/%s' % chapter.name
+            return web.seeother(redirect_to)
         except FileType, e:
-            web.seeother('/upload_profile_pic?broadcast=%s' % e.value)
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
+            web.seeother('/upload_pic?broadcast=%s' % e.value) #TODO: needs to redirect to referer and preserve new blurb (in the case of chapter edits)
 
-
-class edit_chapter_details:
-    def GET(self):
-        try:
-            f = web.input()
-            user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
-            if not user:
-                raise Access('Editing chapter details', 'the chapter leader. You must log in first')
-            edit_access = user[0].level > 2
-            if not edit_access:
-                raise Access('Editing chapter details', 'the chapter leader')
-            chapter = db.select('chapter', {'c':f.chapter}, where='name = $c')[0]
-            content = render.edit_chapter_details(chapter)
-            return render.site(site,
-                               s.user,
-                               web.ctx.fullpath.strip('/'),
-                               str(render.breadcrumb(['chapters', chapter.name, 'Edit details'])),
-                               menu,
-                               f.has_key('broadcast') and f.broadcast or None,
-                               content)
-        except Access, e:
-            web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote(web.ctx.fullpath.strip('/')))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
-
-    def POST(self):
-        try:
-            f = web.input(file={})
-            if f.file.type not in ['image/jpeg', 'image/png', 'image/gif']:
-                raise FileType
-            filename = db.select('dual', what="nextval('file_id_seq') AS id")[0].id
-            ext = f.file.filename.rsplit('.', 1)[1]
-            file = open(base_path + 'static/upload/%s.%s' % (filename, ext), 'w')
-            file.write(f.file.file.read())
-            file.close()
-            db.insert('file',
-                      id=filename,
-                      path='%s.%s' % (filename, ext))
-            db.update('chapter',
-                      where="name = '%s'" % f.chapter,
-                      pic=filename,
-                      blurb=f.blurb)
-            return web.seeother('/chapter/%s' % f.chapter)
-        except FileType, e:
-            web.seeother('/edit_chapter_details?chapter=%s&broadcast=%s' % (f.chapter, e.value))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
 class join:
     def GET(self):
@@ -703,20 +649,44 @@ class join:
         return render.site(site,
                            s.user,
                            web.ctx.fullpath.strip('/'),
-                           str(render.breadcrumb(['chapters', f.chapter, 'join'])),
+                           str(render.breadcrumb(['chapters', [f.chapter, '/chapter/%s' % f.chapter], 'join'])),
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
 
     def POST(self):
         f = web.input()
-        chapter = db.select('chapter', {'c':f.chapter}, where='name = $c')[0]
+        chapter = db.select('chapter', f, where='name = $chapter')[0]
         db.update('member',
                   where="name = '%s'" % s.user,
                   bike=f.bike,
                   chapter=chapter.id)
         return web.seeother('/chapter/%s' % f.chapter)
         
+class gallery:
+    def GET(self):
+        f = web.input()
+        if f.user:
+            user = db.select('member', f, where='name = $user')[0]
+            profile_pics = [p.path for p in
+                            db.select('file', f,
+                                      where="collection = 'profile' AND uploader = $user",
+                                      order='id DESC',
+                                      limit=3)]
+            gallery = [p.path for p in
+                       db.select('file', f,
+                                 where="collection = 'gallery' AND uploader = $user",
+                                 order='id DESC',
+                                 limit=10)]
+        content = render.gallery(f.user, None, profile_pics, gallery, [], True)
+        return render.site(site,
+                           s.user,
+                           web.ctx.fullpath.strip('/'),
+                           str(render.breadcrumb([[f.user, '/profile?user=%s' % f.user], 'gallery'])),
+                           menu,
+                           f.has_key('broadcast') and f.broadcast or None,
+                           content)
+
 class chlev:
     def GET(self):
         try:
@@ -746,8 +716,6 @@ class chlev:
             return web.seeother('/profile?user=%s&broadcast=%s' % (f.user, broadcast))
         except Access, e:
             web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote(web.ctx.fullpath.strip('/')))
-        except:
-            web.seeother('/error?error=%s' % urllib.quote('Unknown error, apologies'))
 
 
 class site_map:
@@ -776,7 +744,7 @@ class sitemap4google:
     def GET(self):
         pages = db.select('page', order='path')
         file = open(base_path + 'static/sitemap.txt', 'w')
-        lines = ['%s/%s\r\n' % (web.ctx.home, p) for p in ['source', 'forum', 'site index']]
+        lines = ['%s/%s\r\n' % (web.ctx.home, p) for p in ['forum', 'site index']]
         for page in pages:
             lines.append('%s/%s\r\n' % (web.ctx.home, page.path))
         file.writelines(lines)

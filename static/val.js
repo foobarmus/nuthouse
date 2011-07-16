@@ -15,6 +15,7 @@ function validate(form) {
                 document.getElementById(e[i].id + '-label').className = '';
             }
         }
+        //TODO: write a max size file upload validator, and use it on the upload_pic form
     }
     return valid;
 }

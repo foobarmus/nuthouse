@@ -5,7 +5,7 @@ $def with (user, joined, level, blog, expand_blog, recent_posts, pages, show, pi
 <table id="profile">
 <tr>
 <th>
-<div id="pic"
+<div id="add-pics"
 
 $if pic:
     style="background: url(/static/upload/$pic) center center no-repeat"
@@ -13,14 +13,23 @@ $if pic:
 >
 
 $if show.blog_link:
-    <a href="upload_profile_pic">&nbsp;</a>
+    <a href="#">&nbsp;</a>
 $else:
     &nbsp;
 
 </div>
 </th>
-<td>
-<div>
+<td id="stats">
+
+$if show.gallery:
+    <div id="gallery-link"><a href="/gallery?user=$user"><img src="/static/image-lib.png" /></a></div>
+
+<div
+
+$if show.gallery:
+    class="pushed-up"
+
+>
 <strong>$level.capitalize()</strong>
 
 $if show.presidential_controls or show.prefect_controls:
@@ -43,7 +52,7 @@ $if show.blog_link:
 
 $if blog:
     <tr>
-    <th>$blog.posted</th>
+    <th><div>$blog.posted</div></th>
     <td>
     <div><strong>$blog.title</strong>
     $if show.blog_link:
@@ -58,7 +67,7 @@ $if blog:
 $if expand_blog:
     $for b in expand_blog:
         <tr>
-        <th>$b.posted</th>
+        <th><div>$b.posted</div></th>
         <td>
         <div><strong>$b.title</strong>
         $if show.blog_link:
@@ -81,7 +90,7 @@ $if recent_posts:
 
 $if pages:
     <tr>
-    <th>Maintainer of</th>
+    <th><div>Maintainer of</div></th>
     <td>
     <table> 
     $for page in pages:

@@ -10,7 +10,6 @@ CREATE TABLE board (
 );
 
 
-
 CREATE TABLE code (
     id SERIAL PRIMARY KEY,
     name TEXT,
@@ -21,12 +20,6 @@ CREATE TABLE code (
 
 CREATE TABLE dual (
     dummy TEXT
-);
-
-
-CREATE TABLE file (
-    id SERIAL PRIMARY KEY,
-    path TEXT
 );
 
 
@@ -47,6 +40,14 @@ CREATE TABLE member (
     pic INT,
     terms_accepted BOOLEAN DEFAULT FALSE,
     joined TIMESTAMP DEFAULT NOW()
+);
+
+
+CREATE TABLE file (
+    id SERIAL PRIMARY KEY,
+    path TEXT,
+    collection TEXT,
+    uploader TEXT REFERENCES member(name)
 );
 
 

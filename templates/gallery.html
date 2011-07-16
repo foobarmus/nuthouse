@@ -1,0 +1,26 @@
+$def with (user, chapter, profile_pics, gallery, recent_events, editable)
+
+$if user:
+    <h2>$user - Gallery</h2>
+$else:
+    <h2>$chapter Chapter - Gallery</h2>
+
+<p>
+<!-- TODO: generate smaller thumbs and make some kind of slide viewer (for visual appeal, but also bandwidth preservation) -->
+$for pic in gallery:
+    <img src="/static/upload/$pic" />
+</p>
+
+$if editable:
+    <p><div id="add-pics"><a href="#">add pics</a></div></p>
+
+<h3>Profile Pics</h3>
+<p>
+$for pic in profile_pics:
+    <img src="/static/upload/$pic" />
+</p>
+
+$for event in recent_events:
+    <h3>$event.name</h3>
+    $for pic in event.pics:
+        <img src="/static/upload/$pic" />

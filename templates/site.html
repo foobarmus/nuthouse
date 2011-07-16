@@ -12,6 +12,8 @@ $if path.split('?')[0] == 'post':
     <script type="text/javascript" src="/static/bbs.js"></script>
 $elif path.split('?')[0] in ['create', 'edit']:
     <script type="text/javascript" src="/static/wiki.js"></script>
+$elif path.split('?')[0].split('/')[0] in ['profile', 'gallery', 'chapter', 'event']:
+    <script type="text/javascript" src="/static/upload_pic.js"></script>
 $elif path.split('?')[0] == 'join':
     <script type="text/javascript" src="/static/val.js"></script>
 

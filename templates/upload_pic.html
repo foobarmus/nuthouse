@@ -1,0 +1,16 @@
+$def with (collection, help_text, blurb)
+
+            <form name="pic_upload" action="/upload_pic" enctype="multipart/form-data" method="post">
+                <fieldset>
+                    <legend>Upload picture</legend>
+                    <input name="file" id="file" type="file" /><br /><br />
+                    <label for="file">jpeg, png or gif...</label> $:help_text 
+
+$if blurb:
+    <br /><br /><br /><label for="blurb">Some introductory blurb about your chapter</label>
+    <textarea name="blurb" id="blurb" class="text">$:blurb</textarea>
+
+</fieldset>
+<input name="collection" type="hidden" value="$collection" />
+<input type="submit" value="upload to $collection.split('#')[0]" />
+</form>
