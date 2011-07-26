@@ -4,10 +4,8 @@ Terms of use
 1. Purpose
 
 This site is designed to facilitate collaboration
-between members of the open source community,
-particularly developers who are interested in or
-involved with the fivedash open source accounting
-project.
+between its members - in particular, motorcycle
+enthusiasts with altruistic tendencies.
 
 2. Reasonable use
 
@@ -28,7 +26,7 @@ locked indefinitely. Spammers will be similarly
 dealt with. Members who behave contrary to the
 reasonable use guidelines above will be warned, and
 may suffer a temporary reduction of privileges.
-Members who ignore such warnings will have their
+Members who repeatedly misbehave will have their
 accounts locked indefinitely.
 
 4. Copyright
@@ -48,8 +46,9 @@ importance to you, you may wish to consider backing
 it up elsewhere, as management will not be held
 responsible for any loss of data. This is especially
 noteworthy because unlike many websites that have
-user-editable content (wikis and so forth) this one
-does not keep a version history.
+user-editable content (wikis and so forth) this site
+does not maintain a version history of any of its
+pages.
 
 6. Account flagging and termination
 

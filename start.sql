@@ -254,13 +254,13 @@ $$
     LANGUAGE plpgsql;
 
 
-COPY file (path) FROM stdin;
-1.png
-\.
-
 COPY code (name, val, comment) FROM stdin;
+menu_item	about us	\N
+menu_item	events	\N
 menu_item	forum	\N
-menu_item	site index	\N
+menu_item	chapters	\N
+menu_item	angel request	\N
+menu_item	site map	\N
 \.
 
 COPY dual (dummy) FROM stdin;

@@ -26,10 +26,6 @@ else:
     from exception import *
 
     web.config.smtp_server = mail['server']
-    web.config.smtp_port = mail['port']
-    web.config.smtp_username = mail['username']
-    web.config.smtp_password = mail['password']
-    web.config.smtp_starttls = mail['starttls']
 
     urls = ('/login', 'login',
             '/auth', 'auth',
@@ -159,7 +155,7 @@ class register:
             user_id = db.select('member', {'u':f.user}, where='name = $u')[0].id
             code = str(random.randint(111,999)) + str(user_id)
             message = render.confirm_email(web.ctx.host, f.user, code)
-            web.sendmail('Nuthouse admin <%s>' % web.config.smtp_username, f.email, 'email address confirmation', message)
+            web.sendmail('%s <%s>' % (site['name'], mail['username']), f.email, 'email address confirmation', message)
             web.seeother('/?broadcast=Thank you for registering. To complete the process please confirm your email address.')
 #        except ConfirmPassword, e:
 #            web.seeother('/register?broadcast=%s&amp;user=%s&amp;email=%s'
@@ -179,7 +175,7 @@ class confirm_email:
                   level=2)
         email = db.select('member', {'u':f.user}, where="name = $u")[0].email
         message = render.welcome(f.user, web.ctx.host)
-        web.sendmail('Nuthouse admin <%s>' % web.config.smtp_username, email, 'thank you for registering',
+        web.sendmail('%s <%s>' % (site['name'], mail['username']), email, 'thank you for registering',
                      message, headers=({'Content-Type':'text/html; charset=UTF-8'}))
         web.seeother('/auth?broadcast=Registration complete')
 

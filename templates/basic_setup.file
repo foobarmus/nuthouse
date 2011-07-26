@@ -15,11 +15,8 @@ db_info = {
 }
 
 mail = {
-    'server':'smtp.gmail.com',
-    'port':587,
-    'username':'$f.gmail_username@gmail.com',
-    'password':'$f.gmail_password',
-    'starttls':True
+    'server':'mailer-daemon.woame.com',
+    'username':'$f.mail_username@woame.com',
 }
 
 # this stuff is only used for initial setup
@@ -28,7 +25,7 @@ consul = {
     'name':'$f.consul',
     'password':'$f.consul_pw',
     'email':'$f.email',
-    'level':7,
+    'level':8,
     'terms_accepted':True
 }
 
