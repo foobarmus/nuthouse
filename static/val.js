@@ -1,3 +1,20 @@
+function fail(elem) {
+    document.getElementById(elem.id + '-label').className = 'failed';
+    return false;
+}
+
+function pass(elem) {
+    document.getElementById(elem.id + '-label').className = '';
+    return true;
+}
+
+function focus(elem, focussed) {
+    if (!focussed) {
+        elem.focus()
+    }
+    return true;
+}
+
 function validate(form) {
     var valid = true;
     var focussed = false;
@@ -5,17 +22,22 @@ function validate(form) {
     for (i=0;i<e.length;i++) {
         if (e[i].className.indexOf('required')>=0) {
             if ((e[i].type == 'checkbox' && e[i].checked != true) || !e[i].value) {
-                document.getElementById(e[i].id + '-label').className = 'failed';
-                valid = false;
-                if (!focussed) {
-                    e[i].focus()
-                    focussed = true;
-                }
+                valid = fail(e[i]);
+                focussed = focus(e[i], focussed);
             } else {
-                document.getElementById(e[i].id + '-label').className = '';
+                valid = pass(e[i]);
             }
         }
-        //TODO: write a max size file upload validator, and use it on the upload_pic form
+        if (e[i].className.indexOf('alpha-numeric')>=0) {
+            var re = new RegExp('^\w*$')
+            if (!e[i].value.match(re)) {
+                valid = fail(e[i]);
+                focussed = focus(e[i], focussed);
+            } else {
+                valid = pass(e[i]);
+            }
+
+        }
     }
     return valid;
 }

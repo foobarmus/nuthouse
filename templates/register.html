@@ -16,12 +16,12 @@ $if broadcast:
 <fieldset>
 <legend>Member details</legend>
 <label for="user" id="user-label">User</label>
-<input name="user" id="user" size="11" class="text required"
+<input name="user" id="user" size="11" class="text required alpha-numeric"
 
 $if user:
     value="$user"
 
-/><br /><br />
+/>&emsp;<span class="grey">no spaces or weird shit</span><br /><br />
 <label for="password" id="password-label">Pwd</label>
 <input name="password" id="password" type="password" size="12" class="text required" /><br /><br />
 <label for="confirm" id="confirm-label">Pwd</label>
