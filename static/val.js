@@ -3,9 +3,9 @@ function fail(elem) {
     return false;
 }
 
-function pass(elem) {
+function pass(elem, valid) {
     document.getElementById(elem.id + '-label').className = '';
-    return true;
+    return valid;
 }
 
 function focus(elem, focussed) {
@@ -25,7 +25,7 @@ function validate(form) {
                 valid = fail(e[i]);
                 focussed = focus(e[i], focussed);
             } else {
-                valid = pass(e[i]);
+                valid = pass(e[i], valid);
             }
         }
         if (e[i].className.indexOf('alpha-numeric')>=0) {
@@ -34,7 +34,7 @@ function validate(form) {
                 valid = fail(e[i]);
                 focussed = focus(e[i], focussed);
             } else {
-                valid = pass(e[i]);
+                valid = pass(e[i], valid);
             }
 
         }
