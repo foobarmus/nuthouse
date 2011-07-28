@@ -29,7 +29,7 @@ function validate(form) {
             }
         }
         if (e[i].className.indexOf('alpha-numeric')>=0) {
-            var re = new RegExp('^\w*$')
+            var re = new RegExp('^\w*$');
             if (!e[i].value.match(re)) {
                 valid = fail(e[i]);
                 focussed = focus(e[i], focussed);
