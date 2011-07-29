@@ -136,7 +136,7 @@ class register:
         return render.register(broadcast, user, email)
 
     def POST(self):
-            import random
+        import random
         try:
             f=web.input()
             if f.password != f.confirm:
