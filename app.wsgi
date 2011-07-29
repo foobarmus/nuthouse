@@ -137,7 +137,7 @@ class register:
 
     def POST(self):
             import random
-#        try:
+        try:
             f=web.input()
             if f.password != f.confirm:
                 raise ConfirmPassword
@@ -157,15 +157,15 @@ class register:
             message = render.confirm_email(web.ctx.host, f.user, code)
             web.sendmail('%s <%s>' % (site['name'], mail['username']), f.email, 'email address confirmation', message)
             web.seeother('/?broadcast=Thank you for registering. To complete the process please confirm your email address.')
-#        except ConfirmPassword, e:
-#            web.seeother('/register?broadcast=%s&amp;user=%s&amp;email=%s'
-#                         % (e.value, f.user, urllib.quote(f.email)))
-#        except DuplicateHandle, e:
-#            web.seeother('/register?broadcast=%s&amp;email=%s'
-#                         % (e.value, urllib.quote(f.email)))
-#        except UserExists, e:
-#            web.seeother('/register?broadcast=%s&amp;user=%s'
-#                         % (e.value, f.user))
+        except ConfirmPassword, e:
+            web.seeother('/register?broadcast=%s&amp;user=%s&amp;email=%s'
+                         % (e.value, f.user, urllib.quote(f.email)))
+        except DuplicateHandle, e:
+            web.seeother('/register?broadcast=%s&amp;email=%s'
+                         % (e.value, urllib.quote(f.email)))
+        except UserExists, e:
+            web.seeother('/register?broadcast=%s&amp;user=%s'
+                         % (e.value, f.user))
 
 class confirm_email:
     def GET(self):

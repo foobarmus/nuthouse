@@ -32,6 +32,10 @@ iframe {
     margin: 2em 0 1em 0;
 }
 
+.grey {
+    color: #a5acb2;
+}
+
 label#terms-label {
     float: none;
     width: auto;

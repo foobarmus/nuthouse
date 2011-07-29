@@ -1,42 +1,35 @@
-function fail(elem) {
-    document.getElementById(elem.id + '-label').className = 'failed';
-    return false;
-}
+var focussed = false;
 
-function pass(elem, valid) {
-    document.getElementById(elem.id + '-label').className = '';
-    return valid;
-}
-
-function focus(elem, focussed) {
-    if (!focussed) {
-        elem.focus()
+function doTest(label, elem, failTest, valid) {
+    if (failTest) {
+        document.getElementById(label).className = 'failed';
+        if (!focussed) {
+            elem.focus();
+            focussed = true;
+        }
+        valid = false;
+    } else {
+        document.getElementById(label).className = (label.indexOf('-help')>=0) ? 'grey' : '';
     }
-    return true;
+    return valid;
 }
 
 function validate(form) {
     var valid = true;
-    var focussed = false;
+    var label;
+    var failTest;
     var e = form.elements;
     for (i=0;i<e.length;i++) {
         if (e[i].className.indexOf('required')>=0) {
-            if ((e[i].type == 'checkbox' && e[i].checked != true) || !e[i].value) {
-                valid = fail(e[i]);
-                focussed = focus(e[i], focussed);
-            } else {
-                valid = pass(e[i], valid);
-            }
+            label = e[i].id + '-label';
+            failTest = ((e[i].type == 'checkbox' && e[i].checked != true) || !e[i].value);
+            valid = doTest(label, e[i], failTest, valid);
         }
         if (e[i].className.indexOf('alpha-numeric')>=0) {
-            var re = new RegExp('^\w*$');
-            if (!e[i].value.match(re)) {
-                valid = fail(e[i]);
-                focussed = focus(e[i], focussed);
-            } else {
-                valid = pass(e[i], valid);
-            }
-
+            var re = new RegExp('^\\w*$');
+            label = e[i].id + '-help';
+            failTest = (!e[i].value.match(re));
+            valid = doTest(label, e[i], failTest, valid);
         }
     }
     return valid;
