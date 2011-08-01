@@ -738,9 +738,9 @@ class error:
 
 class sitemap4google:
     def GET(self):
-        pages = db.select('page', order='path')
+        pages = db.select('page', {'s':'search'}, where="path != $s", order='path')
         file = open(base_path + 'static/sitemap.txt', 'w')
-        lines = ['%s/%s\r\n' % (web.ctx.home, p) for p in ['forum', 'site index']]
+        lines = ['%s/%s\r\n' % (web.ctx.home, p) for p in ['forum']]
         for page in pages:
             lines.append('%s/%s\r\n' % (web.ctx.home, page.path))
         file.writelines(lines)
