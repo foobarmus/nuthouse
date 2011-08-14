@@ -4,6 +4,7 @@ import urlparse
 import os
 import Image
 import StringIO
+import datetime
 
 import web
 import markdown
@@ -39,6 +40,7 @@ else:
             '/post_comment_form', 'post_comment_form',
             '/chapter/(.+)', 'chapter',
             '/join', 'join',
+            '/event/(.+)', 'event',
             '/site map', 'site_map',
             '/error', 'error',
             '/create', 'create',
@@ -345,13 +347,22 @@ class chapter:
             can_join = not user.chapter
         else:
             can_join = False
+        controls = stow({'centurion':s.user == chapter.centurion,
+                         'prefect':user and (user.chapter == chapter.id and user.level > 3) or False})
+        recent_events = list(db.select('event',{'c':chapter.id},
+                                       where='chapter = $c AND begins < CURRENT_DATE',
+                                       order='begins DESC',
+                                       limit=3))
+        for e in recent_events:
+            e.teaser = markdown.markdown(e.teaser.encode('ascii', 'replace'))
+            e.wrapup = markdown.markdown(e.wrapup.encode('ascii', 'replace'))
         content = render.chapter(chapter,
                                  sum(b.count for b in bikes),
                                  bikes,
                                  blog,
                                  expand_blog,
-                                 False,
-                                 stow({'centurion_controls':s.user == chapter.centurion}),
+                                 recent_events,
+                                 controls,
                                  can_join)
         return render.site(site,
                            s.user,
@@ -588,10 +599,9 @@ class upload_pic:
                 if referer[0] == 'chapter':
                     help_text = 'Leave blank to keep current picture.'
                     referer[1] = db.select('chapter', {'c':referer[1].lower()}, where='lower(name) = $c')[0].id
-                obj = db.select(referer[0], {'id':referer[1]}, where='id = $id')[0]
-                collection += '#%s' % referer[1]
-                if referer[0] == 'chapter':
+                    obj = db.select(referer[0], {'id':referer[1]}, where='id = $id')[0]
                     blurb = obj.blurb
+                collection += '#%s' % referer[1]
             return render.upload_pic(collection, help_text, blurb)
         except Access, e:
             web.seeother(('/auth?broadcast=%s&page=' % e.value) + urllib.quote('/'.join(referer)))
@@ -622,8 +632,8 @@ class upload_pic:
                 redirect_to = '/gallery?user=%s' % s.user
             else:
                 type_, id_ = f.collection.split('#', 1)
-                vars_ = {'id':id_}
                 if type_ == 'chapter':
+                    vars_ = {'id':id_}
                     updates = {'blurb':f.blurb}
                     if f.file.filename:
                         updates['pic'] = filename
@@ -633,6 +643,8 @@ class upload_pic:
                               **updates)
                     chapter = db.select('chapter', vars_, where='id = $id')[0]
                     redirect_to = '/chapter/%s' % chapter.name
+                else:
+                    redirect_to = '/%s/%s' % (type_, id_)
             return web.seeother(redirect_to)
         except FileType, e:
             web.seeother('/upload_pic?broadcast=%s' % e.value) #TODO: needs to redirect to referer and preserve new blurb (in the case of chapter edits)
@@ -658,7 +670,7 @@ class join:
                   bike=f.bike,
                   chapter=chapter.id)
         return web.seeother('/chapter/%s' % f.chapter)
-        
+
 class gallery:
     def GET(self):
         f = web.input()
@@ -674,11 +686,37 @@ class gallery:
                                  where="collection = 'gallery' AND uploader = $user",
                                  order='id DESC',
                                  limit=10)]
-        content = render.gallery(f.user, None, profile_pics, gallery, [], True)
+        content = render.gallery(f.user, None, profile_pics, gallery, [], True) # unfinished, also check gallery link image logic on profile
         return render.site(site,
                            s.user,
                            web.ctx.fullpath.strip('/'),
                            str(render.breadcrumb([[f.user, '/profile?user=%s' % f.user], 'gallery'])),
+                           menu,
+                           f.has_key('broadcast') and f.broadcast or None,
+                           content)
+
+class event:
+    def GET(self, uri):
+        f = web.input()
+        vars_ = {'e':uri}
+        event = db.select('event', vars_, where='id = $e')[0]
+        event.teaser = markdown.markdown(event.teaser.encode('ascii', 'replace'))
+        event.wrapup = markdown.markdown(event.wrapup.encode('ascii', 'replace'))
+        chapter = db.select('chapter', {'c':event.chapter}, where='id = $c')[0]
+        editable = s.user in [event.organiser, chapter.centurion]
+        attendees = [a.member for a in db.select('attendance', vars_, where='event = $e')]
+        user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
+        can_attend = (user and user[0].chapter == event.chapter) and datetime.datetime.now() < event.begins - datetime.timedelta(days=1)
+        gallery = [p.path for p in
+                   db.select('file', {'c':'event#%s' % uri},
+                             where='collection = $c',
+                             order='id DESC',
+                             limit=10)]
+        content = render.event(event, attendees, gallery, editable, can_attend)
+        return render.site(site,
+                           s.user,
+                           web.ctx.fullpath.strip('/'),
+                           str(render.breadcrumb(['events', event.id])),
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)

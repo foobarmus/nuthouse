@@ -1,0 +1,29 @@
+$def with (event, attendees, gallery, editable, can_attend)
+
+<h2>$event.name</h2>
+<p>
+
+$if event.wrapup:
+    <div>$:event.wrapup</div>
+$else:
+    <div>$:event.teaser</div>
+
+$if attendees:
+    <h2>Attendees</h2>
+    <ul>
+    $for attendee in attendees:
+        <li><a href="profile?user=$attendee">$attendee</a></li>
+    </ul>
+
+</p>
+<p>
+<!-- TODO: generate smaller thumbs and make some kind of slide viewer (for visual appeal, but also bandwidth preservation) -->
+$for pic in gallery:
+    <img src="/static/upload/$pic" />
+</p>
+
+$if editable:
+    <p><div id="add-pics"><a href="#">add pics</a></div></p>
+
+$if can_attend:
+    <p><a href="/attend?event=$event.id">register to attend this event</a></p>

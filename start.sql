@@ -104,6 +104,27 @@ CREATE TABLE chapter (
 );
 
 
+CREATE TABLE event (
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    chapter SMALLINT REFERENCES chapter,
+    begins TIMESTAMP,
+    duration INTERVAL DEFAULT '05:00:00',
+    teaser TEXT,
+    wrapup TEXT,
+    organiser TEXT REFERENCES member(name),
+    created TIMESTAMP DEFAULT now()
+);
+
+
+CREATE TABLE attendance (
+    event INT REFERENCES event,
+    member TEXT REFERENCES member(name),
+    PRIMARY KEY (event, member),
+    verified BOOLEAN DEFAULT 'f'
+);
+
+
 CREATE TABLE session (
     session_id CHAR(128) PRIMARY KEY,
     atime TIMESTAMP DEFAULT NOW() NOT NULL,

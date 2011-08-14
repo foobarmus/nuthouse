@@ -1,0 +1,54 @@
+$def with (event, now, action)
+
+<form name="event_form" action="$action" method="post">
+<fieldset>
+<legend>Event details</legend>
+<label for="name" id="name-label">Event name</label>
+<input name="name" id="name" type="text required"
+
+$if name:
+    value="$name"
+
+/><br />
+<label for="begins" id="begins-label">Start date &amp; time</label>
+<input name="begins" id="begins" type="text required"
+
+$if event:
+    value="$event.begins"
+$else:
+    value="$now"
+
+/><br />
+<label for="duration" id="duration-label">Duration (hours)</label>
+<input name="duration" id="duration" type="text required"
+
+$if event:
+    value="$event.duration"
+$else:
+    value="5"
+
+/><br /><br />
+
+$if event and event.begins > now:
+    <label for="wrapup" id="wrapup-label">
+    Wrap up (you can use <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>)
+    </label><br />
+    <textarea name="wrapup" id="wrapup" class="text area_wide required">$:event.wrapup</textarea>
+$else:
+    <label for="teaser" id="teaser-label">
+    Teaser (you can use <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>)
+    </label><br />
+    <textarea name="teaser" id="teaser" class="text area_wide required">$:event.teaser</textarea>
+
+</fieldset>
+<input type="hidden" name="event" value="$event.id" />
+<input type="hidden" name="chapter" value="$event.chapter" />
+<input type="submit"
+
+$if action == 'edit':
+    value="update event"
+$else:
+    value="create event"
+
+/>
+</form>

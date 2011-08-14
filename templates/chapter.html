@@ -1,4 +1,4 @@
-$def with (chapter, members, bikes, blog, expand_blog, recent_events, show, can_join)
+$def with (chapter, members, bikes, blog, expand_blog, recent_events, controls, can_join)
 
 <h2>$chapter.name Chapter</h2>
 <div id="chapter-wrap">
@@ -39,6 +39,10 @@ $if can_join:
     <tr><th></th>
     <td><a href="/join?chapter=$chapter.name">join this chapter</a></td>
     </tr>
+$elif controls.prefect:
+    <tr><th></th>
+    <td><a href="/event?chapter=$chapter.name">create an event</a></td>
+    </tr>
 
 </table>
 
@@ -50,7 +54,7 @@ $if chapter.pic:
 
 >
 
-$if show.centurion_controls:
+$if controls.centurion:
     <a href="#">&nbsp;</a>
 $else:
     &nbsp;
@@ -61,6 +65,7 @@ $:chapter.blurb
 </div>
 
 $if blog:
+    <h2>Centurion's Blog</h2>
     <h4>$blog.posted &mdash; $blog.title</h4>
     $:blog.content
     $if expand_blog == False:
@@ -72,8 +77,9 @@ $if expand_blog:
         $:b.content
 
 $if recent_events:
-    <h3>Recent events</h3>
+    <h2>Recent events</h2>
     $for event in recent_events:
-        <p><strong>$event.date</strong> $event.name</p>
+        <h4><a href="/event/$event.id">$event.begins &mdash; $event.name</a></h4>
+        $:event.wrapup
 
 </div>
