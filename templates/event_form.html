@@ -1,13 +1,14 @@
-$def with (event, now, action)
+$def with (event, begins, chapter)
 
-<form name="event_form" action="$action" method="post">
+<td colspan="2">
+<form name="event_form" action="/event" method="post">
 <fieldset>
 <legend>Event details</legend>
 <label for="name" id="name-label">Event name</label>
 <input name="name" id="name" type="text required"
 
-$if name:
-    value="$name"
+$if event:
+    value="$event.name"
 
 /><br />
 <label for="begins" id="begins-label">Start date &amp; time</label>
@@ -16,39 +17,39 @@ $if name:
 $if event:
     value="$event.begins"
 $else:
-    value="$now"
+    value="$begins"
 
 /><br />
-<label for="duration" id="duration-label">Duration (hours)</label>
+<label for="duration" id="duration-label">Duration (hh:mm)</label>
 <input name="duration" id="duration" type="text required"
 
 $if event:
     value="$event.duration"
 $else:
-    value="5"
+    value="05:00"
 
 /><br /><br />
-
-$if event and event.begins > now:
-    <label for="wrapup" id="wrapup-label">
-    Wrap up (you can use <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>)
-    </label><br />
-    <textarea name="wrapup" id="wrapup" class="text area_wide required">$:event.wrapup</textarea>
-$else:
-    <label for="teaser" id="teaser-label">
-    Teaser (you can use <a target="_blank" href="http://daringfireball.net/projects/markdown/basics">markdown</a>)
-    </label><br />
+<label for="teaser" id="teaser-label">Teaser</label>
+$if event:
     <textarea name="teaser" id="teaser" class="text area_wide required">$:event.teaser</textarea>
+$else:
+    <textarea name="teaser" id="teaser" class="text area_wide required"></textarea>
 
 </fieldset>
-<input type="hidden" name="event" value="$event.id" />
-<input type="hidden" name="chapter" value="$event.chapter" />
+
+$if event:
+    <input type="hidden" name="event" value="$event.id" />
+    <input type="hidden" name="chapter" value="$event.chapter" />
+$else:
+    <input type="hidden" name="chapter" value="$chapter" />
+
 <input type="submit"
 
-$if action == 'edit':
+$if event:
     value="update event"
 $else:
     value="create event"
 
 />
 </form>
+</td>

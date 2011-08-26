@@ -30,6 +30,11 @@ h3, h4, h5 {
     color: #c00;
 }
 
+h3 em, h4 em, h5 em {
+    font-weight: normal;
+    color: #a98;
+}
+
 p {
     clear: both;
     margin: 0 0 6 0;
@@ -257,6 +262,23 @@ code {
     padding-left: 0;
 }
 
+#chapter-wrap table#profile fieldset {
+    margin-top: 0;
+    padding: 0;
+    text-align: left;
+}
+
+#chapter-wrap table#profile label {
+    float: left;
+    width: 130px;
+    padding-top: 3px;
+}
+
+#chapter-wrap table#profile form .text.area_wide {
+    width: 176px;
+    height: 50px
+}
+
 #chapter-blurb {
     clear: left;
 }
@@ -275,6 +297,10 @@ code {
     opacity: 0;
     filter:alpha(opacity=0);
     -moz-opacity: 0;
+}
+
+#chapter-wrap #chapter_id {
+    display: none;
 }
 
 table.padded th {

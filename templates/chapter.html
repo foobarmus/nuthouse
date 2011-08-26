@@ -1,4 +1,4 @@
-$def with (chapter, members, bikes, blog, expand_blog, recent_events, controls, can_join)
+$def with (chapter, members, bikes, next_event, blog, expand_blog, recent_events, controls, can_join)
 
 <h2>$chapter.name Chapter</h2>
 <div id="chapter-wrap">
@@ -33,6 +33,13 @@ $for bike in bikes:
     <br />
 
 </td>
+
+$if next_event:
+    <tr>
+    <th><div>Next Event</div></th>
+    <td><a href="/event/$next_event.id">$next_event.name</a> <em>&emsp;$next_event.human_date</em><div>$:next_event.teaser</div></td>
+    </tr>
+
 </tr>
 
 $if can_join:
@@ -40,8 +47,8 @@ $if can_join:
     <td><a href="/join?chapter=$chapter.name">join this chapter</a></td>
     </tr>
 $elif controls.prefect:
-    <tr><th></th>
-    <td><a href="/event?chapter=$chapter.name">create an event</a></td>
+    <tr id="event_form"><th></th>
+    <td><a href="#">create an event</a><span id="chapter_id">$chapter.id</span></td>
     </tr>
 
 </table>
@@ -64,22 +71,22 @@ $else:
 $:chapter.blurb
 </div>
 
+$if recent_events:
+    <h2>Recent events</h2>
+    $for event in recent_events:
+        <h4><a href="/event/$event.id">$event.name</a> <em>&emsp;$event.human_date</em></h4>
+        $:event.wrapup
+
 $if blog:
-    <h2>Centurion's Blog</h2>
-    <h4>$blog.posted &mdash; $blog.title</h4>
+    <h2>Blog</h2>
+    <h4>$blog.title <em>&emsp;$blog.human_date</em></h4>
     $:blog.content
     $if expand_blog == False:
         <p><a href="/chapter/$chapter.name?expand_blog=t">show prior entries</a></p>
 
 $if expand_blog:
     $for b in expand_blog:
-        <h4>$b.posted &mdash; $b.title</h4>
+        <h4>$b.title <em>&emsp;$b.human_date</em></h4>
         $:b.content
-
-$if recent_events:
-    <h2>Recent events</h2>
-    $for event in recent_events:
-        <h4><a href="/event/$event.id">$event.begins &mdash; $event.name</a></h4>
-        $:event.wrapup
 
 </div>

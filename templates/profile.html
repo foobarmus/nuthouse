@@ -1,14 +1,14 @@
-$def with (user, joined, level, blog, expand_blog, recent_posts, pages, show, pic)
+$def with (user, blog, expand_blog, recent_posts, pages, show)
 
-<h2>$user</h2>
+<h2>$user.name</h2>
 <p>
 <table id="profile">
 <tr>
 <th>
 <div id="add-pics"
 
-$if pic:
-    style="background: url(/static/upload/$pic) center center no-repeat"
+$if user.pic:
+    style="background: url(/static/upload/$user.pic) center center no-repeat"
 
 >
 
@@ -22,7 +22,7 @@ $else:
 <td id="stats">
 
 $if show.gallery:
-    <div id="gallery-link"><a href="/gallery?user=$user"><img src="/static/image-lib.png" /></a></div>
+    <div id="gallery-link"><a href="/gallery?user=$user.name"><img src="/static/image-lib.png" /></a></div>
 
 <div
 
@@ -30,19 +30,19 @@ $if show.gallery:
     class="pushed-up"
 
 >
-<strong>$level.capitalize()</strong>
+<strong>$user.level_name.capitalize()</strong>
 
 $if show.presidential_controls or show.prefect_controls:
     (
     $if show.presidential_controls:
-        <a title="level up" href="/level_up?user=$user">++</a>&ensp;
+        <a title="level up" href="/level_up?user=$user.name">++</a>&ensp;
     $if show.prefect_controls:
-        <a title="punish" href="/troglify?user=$user">&minus;&minus;</a>&ensp;
-        <a title="lock account" href="/lock?user=$user">X</a>
+        <a title="punish" href="/troglify?user=$user.name">&minus;&minus;</a>&ensp;
+        <a title="lock account" href="/lock?user=$user.name">X</a>
     )
 
 </div>
-<p>Member since: $joined</p>
+<p>Member since: $user.human_date</p>
 
 $if show.blog_link:
     <p><a href="/blog_create">new blog post</a></p>
@@ -52,7 +52,7 @@ $if show.blog_link:
 
 $if blog:
     <tr>
-    <th><div>$blog.posted</div></th>
+    <th><div>$blog.human_date</div></th>
     <td>
     <div><strong>$blog.title</strong>
     $if show.blog_link:
@@ -60,14 +60,14 @@ $if blog:
     </div>
     $:blog.content
     $if expand_blog == False:
-        <p><a href="/profile?user=$user&expand_blog=t">show prior entries</a></p>
+        <p><a href="/profile?user=$user.name&expand_blog=t">show prior entries</a></p>
     </td>
     </tr>
 
 $if expand_blog:
     $for b in expand_blog:
         <tr>
-        <th><div>$b.posted</div></th>
+        <th><div>$b.human_date</div></th>
         <td>
         <div><strong>$b.title</strong>
         $if show.blog_link:

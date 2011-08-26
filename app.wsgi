@@ -41,6 +41,7 @@ else:
             '/chapter/(.+)', 'chapter',
             '/join', 'join',
             '/event/(.+)', 'event',
+            '/event', 'event_form',
             '/site map', 'site_map',
             '/error', 'error',
             '/create', 'create',
@@ -191,43 +192,42 @@ class forgot:
 class profile:
     def GET(self):
         f = web.input()
-        vars_ = {'u':f.user}
-        user = db.select('member m LEFT JOIN file f ON m.pic = f.id, level l', vars_,
-                         what='joined, l.id AS level, l.name AS level_name, path AS pic',
-                         where='m.level = l.id AND m.name = $u')[0]
+        user = db.select('member m LEFT JOIN file f ON m.pic = f.id, level l', f,
+                         what='m.name, joined, l.id AS level, l.name AS level_name, path AS pic',
+                         where='m.level = l.id AND m.name = $user')[0]
+        user.human_date = user.joined.strftime('%B %Y')
         if f.has_key('expand_blog') and f.expand_blog == 't':
             blog = None
-            expand_blog = list(db.select('blog', vars_,
-                                          what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
-                                          where='member = $u',
+            expand_blog = list(db.select('blog', f,
+                                          where='member = $user',
                                           order='posted DESC', limit=10))
             for i in range(len(expand_blog)):
                 expand_blog[i].content = markdown.markdown(expand_blog[i].content.encode('ascii', 'replace'))
+                expand_blog[i].human_date = expand_blog[i].posted.strftime('%d %B %Y')
         else:
-            if db.select('blog', vars_, what='count(*)', where='member = $u')[0].count > 1:
+            if db.select('blog', f, what='count(*)', where='member = $user')[0].count > 1:
                 expand_blog = False
             else:
                 expand_blog = None
-            blog = db.select('blog', vars_,
-                              what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
-                              where='member = $u',
+            blog = db.select('blog', f,
+                              where='member = $user',
                               order='posted DESC', limit=1)
             if blog:
                 blog = blog[0]
                 blog.content = markdown.markdown(blog.content.encode('ascii', 'replace'))
-        recent_posts = db.select('post', vars_,
+                blog.human_date = blog.posted.strftime('%d %B %Y')
+        recent_posts = db.select('post', f,
                                  what="id, subject",
-                                 where="member = $u AND posted > (NOW() - interval '3 months')",
+                                 where="member = $user AND posted > (NOW() - interval '3 months')",
                                  order='posted DESC', limit=5)
-        pages = db.select('page', vars_, where='owner = $u', order='path')
-        slevel = db.select('member', {'m':s.user}, where='name = $m')
+        pages = db.select('page', f, where='owner = $user', order='path')
+        slevel = db.select('member', s, where='name = $user')
         slevel = slevel and slevel[0].level or 0
         show = stow({'blog_link':(f.user == s.user) and slevel > 2,
                      'prefect_controls':(f.user != s.user) and user.level > 1 and slevel > max(3, user.level),
                      'presidential_controls':(f.user != s.user) and user.level < 6 and slevel > 7,
                      'gallery':True})
-        content = render.profile(f.user, str(user.joined).split()[0], user.level_name,
-                                 blog, expand_blog, recent_posts, pages, show, user.pic)
+        content = render.profile(user, blog, expand_blog, recent_posts, pages, show)
         return render.site(site,
                            s.user,
                            web.ctx.fullpath.strip('/'),
@@ -320,27 +320,34 @@ class chapter:
         chapter.founded = chapter.founded.strftime('%B %Y')
         chapter.blurb = markdown.markdown(chapter.blurb.encode('ascii', 'replace'))
         bikes = list(db.select('member', {'c':chapter.id}, what='bike, count(bike)', where='chapter = $c', order='bike', group='bike'))
-        vars_ = {'u':chapter.centurion}
+        next_event = db.select('event', chapter,
+                               where='chapter = $id AND begins > CURRENT_DATE',
+                               order='begins',
+                               limit=1)
+        if next_event:
+            next_event = next_event[0]
+            next_event.teaser = markdown.markdown(next_event.teaser.encode('ascii', 'replace'))
+            next_event.human_date = next_event.begins.strftime('%d %b')
         if f.has_key('expand_blog') and f.expand_blog == 't':
             blog = None
-            expand_blog = list(db.select('blog', vars_,
-                                          what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
-                                          where='member = $u',
+            expand_blog = list(db.select('blog', chapter,
+                                          where='member = $centurion',
                                           order='posted DESC', limit=10))
             for i in range(len(expand_blog)):
                 expand_blog[i].content = markdown.markdown(expand_blog[i].content.encode('ascii', 'replace'))
+                expand_blog[i].human_date = expand_blog[i].posted.strftime('%A, %d %B')
         else:
-            if db.select('blog', vars_, what='count(*)', where='member = $u')[0].count > 1:
+            if db.select('blog', chapter, what='count(*)', where='member = $centurion')[0].count > 1:
                 expand_blog = False
             else:
                 expand_blog = None
-            blog = db.select('blog', vars_,
-                              what="id, title, content, TO_CHAR(posted, 'YYYY-MM-DD') AS posted",
-                              where='member = $u',
+            blog = db.select('blog', chapter,
+                              where='member = $centurion',
                               order='posted DESC', limit=1)
             if blog:
                 blog = blog[0]
                 blog.content = markdown.markdown(blog.content.encode('ascii', 'replace'))
+                blog.human_date = blog.posted.strftime('%A, %d %B')
         user = db.select('member', {'u':s.user}, where='name = $u')
         if user:
             user = user[0]
@@ -350,15 +357,17 @@ class chapter:
         controls = stow({'centurion':s.user == chapter.centurion,
                          'prefect':user and (user.chapter == chapter.id and user.level > 3) or False})
         recent_events = list(db.select('event',{'c':chapter.id},
-                                       where='chapter = $c AND begins < CURRENT_DATE',
+                                       where='chapter = $c AND begins < CURRENT_DATE AND wrapup IS NOT NULL',
                                        order='begins DESC',
                                        limit=3))
         for e in recent_events:
             e.teaser = markdown.markdown(e.teaser.encode('ascii', 'replace'))
             e.wrapup = markdown.markdown(e.wrapup.encode('ascii', 'replace'))
+            e.human_date = e.begins.strftime('%A, %d %B')
         content = render.chapter(chapter,
                                  sum(b.count for b in bikes),
                                  bikes,
+                                 next_event,
                                  blog,
                                  expand_blog,
                                  recent_events,
@@ -671,6 +680,7 @@ class join:
                   chapter=chapter.id)
         return web.seeother('/chapter/%s' % f.chapter)
 
+
 class gallery:
     def GET(self):
         f = web.input()
@@ -695,13 +705,15 @@ class gallery:
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
 
+
 class event:
     def GET(self, uri):
         f = web.input()
         vars_ = {'e':uri}
         event = db.select('event', vars_, where='id = $e')[0]
         event.teaser = markdown.markdown(event.teaser.encode('ascii', 'replace'))
-        event.wrapup = markdown.markdown(event.wrapup.encode('ascii', 'replace'))
+        if event.wrapup:
+            event.wrapup = markdown.markdown(event.wrapup.encode('ascii', 'replace'))
         chapter = db.select('chapter', {'c':event.chapter}, where='id = $c')[0]
         editable = s.user in [event.organiser, chapter.centurion]
         attendees = [a.member for a in db.select('attendance', vars_, where='event = $e')]
@@ -720,6 +732,25 @@ class event:
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
+
+
+class event_form:
+    def GET(self):
+        f = web.input()
+        event = f.has_key('id') and db.select('event', {'e':f.id}, where='id = $e')[0] or None
+        today = datetime.datetime.today().replace(hour=10,minute=0,second=0,microsecond=0)
+        begins = (today + datetime.timedelta(days=21 - (today.weekday() + 1))).strftime('%Y-%m-%d %H:%M')
+        chapter = f.has_key('chapter') and f.chapter or None
+        return render.event_form(event, begins, chapter)
+
+    def POST(self):
+        f = web.input()
+        if f.has_key('event'):
+            pass # update
+        else:
+            event = db.insert('event', **f)
+            chapter = db.select('chapter', f, where='id = $chapter')[0]
+        return web.seeother('chapter/%s' % chapter.name)
 
 class chlev:
     def GET(self):
