@@ -1,0 +1,22 @@
+$def with (event, attendees)
+
+<h2>$event.name</h2>
+<form name="wrapup" action="/wrapup" method="post" onsubmit="return validate(this)" style="text-align: left;">
+    <fieldset>
+        <legend>Wrap up</legend>
+        <label for="wrapup" id="wrapup-label">Wrap up (briefly describe what occurred on the day - ie, the highlights)</label><br /><br />
+        <textarea name="wrapup" id="wrapup" class="text area_wide required" style="width:800px; height:80px;">$:event.wrapup</textarea>
+    </fieldset>
+
+    <h2>Attendees</h2>
+    <fieldset>
+        <legend>Attendance</legend>
+        <label for="attendees">Confirm attendance</label><br /><br />
+
+$for attendee in attendees:
+    <input name="attendees" type="checkbox" value="$attendee" checked="checked"/>$attendee<br />
+
+</fieldset>
+<input type="hidden" name="event" value="$event.id" />
+<input type="submit" value="update event" />
+</form>

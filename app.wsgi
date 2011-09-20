@@ -42,6 +42,8 @@ else:
             '/join', 'join',
             '/event/(.+)', 'event',
             '/event', 'event_form',
+            '/attend', 'attend',
+            '/wrapup', 'wrapup',
             '/site map', 'site_map',
             '/error', 'error',
             '/create', 'create',
@@ -170,6 +172,7 @@ class register:
             web.seeother('/register?broadcast=%s&amp;user=%s'
                          % (e.value, f.user))
 
+
 class confirm_email:
     def GET(self):
         f = web.input()
@@ -182,12 +185,14 @@ class confirm_email:
                      message, headers=({'Content-Type':'text/html; charset=UTF-8'}))
         web.seeother('/auth?broadcast=Registration complete')
 
+
 class forgot:
     def GET(self):
         try:
             raise Unfinished
         except Unfinished, e:
             web.seeother('/error?error=%s' % urllib.quote(e.value))
+
 
 class profile:
     def GET(self):
@@ -712,19 +717,26 @@ class event:
         vars_ = {'e':uri}
         event = db.select('event', vars_, where='id = $e')[0]
         event.teaser = markdown.markdown(event.teaser.encode('ascii', 'replace'))
-        if event.wrapup:
-            event.wrapup = markdown.markdown(event.wrapup.encode('ascii', 'replace'))
         chapter = db.select('chapter', {'c':event.chapter}, where='id = $c')[0]
         editable = s.user in [event.organiser, chapter.centurion]
+        if event.wrapup:
+            event.wrapup = markdown.markdown(event.wrapup.encode('ascii', 'replace'))
+            wrapupable = False
+        else:
+            wrapupable = editable and event.begins.date() <= datetime.date.today()
         attendees = [a.member for a in db.select('attendance', vars_, where='event = $e')]
         user = s.user and db.select('member', {'m':s.user}, where="name = $m") or None
-        can_attend = (user and user[0].chapter == event.chapter) and datetime.datetime.now() < event.begins - datetime.timedelta(days=1)
+        if user:
+            user = user[0]
+        can_attend = user and user.chapter == event.chapter \
+                     and user.name not in attendees \
+                     and datetime.datetime.now() < event.begins - datetime.timedelta(days=1)
         gallery = [p.path for p in
                    db.select('file', {'c':'event#%s' % uri},
                              where='collection = $c',
                              order='id DESC',
                              limit=10)]
-        content = render.event(event, attendees, gallery, editable, can_attend)
+        content = render.event(event, attendees, gallery, editable, wrapupable, can_attend)
         return render.site(site,
                            s.user,
                            web.ctx.fullpath.strip('/'),
@@ -732,6 +744,24 @@ class event:
                            menu,
                            f.has_key('broadcast') and f.broadcast or None,
                            content)
+
+
+class wrapup:
+    def GET(self):
+        referer = urllib.unquote_plus(urlparse.urlparse(web.ctx.env.get('HTTP_REFERER', web.ctx.home))[2]).strip('/').split('/')
+        vars_ = {'e':referer[1]}
+        event = db.select('event', vars_, where='id = $e')[0]
+        if event.wrapup:
+            event.wrapup = markdown.markdown(event.wrapup.encode('ascii', 'replace'))
+        attendees = [a.member for a in db.select('attendance', vars_, where='event = $e')]
+        return render.event_wrapup(event, attendees)
+
+    def POST(self):
+        f = web.input(attendees=[])
+        db.update('event', where='id = $event', vars=f, wrapup=f.wrapup)
+        for attendee in f.attendees:
+            db.update('attendance', where="event = %s AND member = '%s'" % (int(f.event), attendee), verified=True)
+        return web.seeother('/event/%s' % f.event)
 
 
 class event_form:
@@ -751,6 +781,18 @@ class event_form:
             event = db.insert('event', **f)
             chapter = db.select('chapter', f, where='id = $chapter')[0]
         return web.seeother('chapter/%s' % chapter.name)
+
+
+class attend:
+    def GET(self):
+        f = web.input()
+        a = {
+            'member':db.select('member', s, where="name = $user")[0].name,
+            'event':int(f.event)
+        }
+        db.insert('attendance', **a)
+        return web.seeother('/event/%s' % f.event)
+
 
 class chlev:
     def GET(self):

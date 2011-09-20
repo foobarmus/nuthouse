@@ -1,5 +1,6 @@
-$def with (event, attendees, gallery, editable, can_attend)
+$def with (event, attendees, gallery, editable, wrapupable, can_attend)
 
+<div id="frap">
 <h2>$event.name</h2>
 <p>
 
@@ -16,14 +17,21 @@ $if attendees:
     </ul>
 
 </p>
-<p>
-<!-- TODO: generate smaller thumbs and make some kind of slide viewer (for visual appeal, but also bandwidth preservation) -->
-$for pic in gallery:
-    <img src="/static/upload/$pic" />
-</p>
+</div>
+
+$if gallery:
+    <h2>Gallery</h2>
+    <p>
+    <!-- TODO: generate smaller thumbs and make some kind of slide viewer (for visual appeal, but also bandwidth preservation) -->
+    $for pic in gallery:
+        <img src="/static/upload/$pic" />
+    </p>
 
 $if editable:
     <p><div id="add-pics"><a href="#">add pics</a></div></p>
+
+$if wrapupable:
+    <p><div id="wrap-up"><a href="#">wrap up</a></div></p>
 
 $if can_attend:
     <p><a href="/attend?event=$event.id">register to attend this event</a></p>

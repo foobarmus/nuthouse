@@ -14,7 +14,11 @@ $elif path.split('?')[0] in ['create', 'edit']:
     <script type="text/javascript" src="/static/wiki.js"></script>
 $elif path.split('?')[0].split('/')[0] in ['profile', 'gallery', 'chapter', 'event']:
     <script type="text/javascript" src="/static/upload_pic.js"></script>
-    <script type="text/javascript" src="/static/chapter.js"></script>
+    $if path.split('?')[0].split('/')[0] == 'chapter':
+        <script type="text/javascript" src="/static/chapter.js"></script>
+    $elif path.split('?')[0].split('/')[0] == 'event':
+        <script type="text/javascript" src="/static/event.js"></script>
+        <script type="text/javascript" src="/static/val.js"></script>
 $elif path.split('?')[0] == 'join':
     <script type="text/javascript" src="/static/val.js"></script>
 
