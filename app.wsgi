@@ -44,6 +44,7 @@ else:
             '/event', 'event_form',
             '/attend', 'attend',
             '/wrapup', 'wrapup',
+            '/angel request', 'angel',
             '/site map', 'site_map',
             '/error', 'error',
             '/create', 'create',
@@ -792,6 +793,22 @@ class attend:
         }
         db.insert('attendance', **a)
         return web.seeother('/event/%s' % f.event)
+
+
+class angel:
+    def GET(self):
+        f = web.input()
+        user = s.user and db.select('member', s, where="name = $user") or None
+        if user:
+            user = user[0]
+        content = render.angel_request(user)
+        return render.site(site,
+                           s.user,
+                           web.ctx.fullpath.strip('/'),
+                           str(render.breadcrumb(['Angel request'])),
+                           menu,
+                           f.has_key('broadcast') and f.broadcast or None,
+                           content)
 
 
 class chlev:

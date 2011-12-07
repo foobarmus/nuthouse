@@ -1,0 +1,45 @@
+$def with (member)
+
+<h2>Angel Request</h2>
+<p>
+Do you know someone in need? Weekend Off Angels may be able to help, if only in a small way.
+Please submit a request using the form below. If we are able to help, you will be contacted
+by a local representative.
+</p>
+<form name="angel_request" action="angel" method="post">
+
+$if member:
+    <input type="hidden" name="member" value="$member" />
+$else:
+    <fieldset>
+    <legend>Your contact details</legend>
+    <label for="email_or_phone" id="email_or_phone-label">Your email address or phone number</label><br />
+    <input name="email_or_phone" id="email_or_phone" class="text required" />
+    </fieldset>
+
+<fieldset>
+<legend>Particulars</legend>
+<label for="comment" id="comment-label">
+    Briefly describe the circumstances and requirements<br />
+    of the beneficiary, and their relationship to you
+</label><br />
+<textarea name="comment" id="comment" class="text area_wide"></textarea>
+</fieldset>
+
+$if not member:
+    <fieldset>
+    <legend>Verification</legend>
+    <script type="text/javascript"
+     src="http://www.google.com/recaptcha/api/challenge?k=6LcDVMoSAAAAAPQzHAP-GD7PB8Wo5bd5PJQNFZu7">
+    </script>
+    <noscript>
+    <iframe src="http://www.google.com/recaptcha/api/noscript?k=6LcDVMoSAAAAAPQzHAP-GD7PB8Wo5bd5PJQNFZu7"
+     height="300" width="500" frameborder="0"></iframe><br>
+    <textarea name="recaptcha_challenge_field" rows="3" cols="40">
+    </textarea>
+    <input type="hidden" name="recaptcha_response_field" value="manual_challenge">
+    </noscript>
+    </fieldset>
+
+<input type="submit" value="submit request" />
+</form>
